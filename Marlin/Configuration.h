@@ -29,7 +29,7 @@
 // Sanguinololu 1.2 and above = 62
 // Ultimaker = 7,
 // Teensylu = 8
-#define MOTHERBOARD 7
+#define MOTHERBOARD 33
 
 //===========================================================================
 //=============================Thermal Settings  ============================
@@ -315,7 +315,7 @@ const bool Z_ENDSTOPS_INVERTING = true; // set to true to invert the logic of th
 #define SD_FINISHED_STEPPERRELEASE true  //if sd support and the file is finished: disable steppers?
 #define SD_FINISHED_RELEASECOMMAND "M84 X Y E" // no z because of layer shift.
 
-#define ULTIPANEL
+//#define ULTIPANEL
 #ifdef ULTIPANEL
   //#define NEWPANEL  //enable this if you have a click-encoder panel
   #define SDSUPPORT
