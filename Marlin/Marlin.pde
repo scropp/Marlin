@@ -1151,6 +1151,13 @@ FORCE_INLINE void process_commands()
       EEPROM_printSettings();
     }
     break;
+    case 504: // print free memory
+    {
+      SERIAL_ECHO_START;
+      SERIAL_ECHOPGM("Free Memory:");
+      SERIAL_ECHO(freeMemory());
+    }
+    break;
 
     }
   }
