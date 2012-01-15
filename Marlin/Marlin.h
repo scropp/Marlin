@@ -26,7 +26,7 @@
 #include "pins.h"
 
 #if ARDUINO >= 100 
-  #if defined(__AVR_ATmega644P__)
+  #if defined(__AVR_ATmega644P__) || defined (__AVR_ATmega1284P__)
     #include "WProgram.h"
   #else
     #include "Arduino.h"
