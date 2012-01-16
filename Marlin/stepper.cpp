@@ -29,6 +29,8 @@
 #include "planner.h"
 #include "temperature.h"
 #include "ultralcd.h"
+#include "led.h"
+
 
 #include "speed_lookuptable.h"
 
@@ -764,6 +766,7 @@ void st_synchronize()
     manage_heater();
     manage_inactivity(1);
     LCD_STATUS;
+    LED_STATUS;
   }
 }
 

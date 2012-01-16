@@ -30,6 +30,7 @@
 
 
 #include "ultralcd.h"
+#include "led.h"
 #include "planner.h"
 #include "stepper.h"
 #include "temperature.h"
@@ -260,6 +261,9 @@ void setup()
   plan_init();  // Initialize planner;
   st_init();    // Initialize stepper;
   wd_init();
+  #if (LED_PIN > -1)
+    led_init();
+  #endif
   setup_photpin();
 }
 
@@ -302,6 +306,7 @@ void loop()
   manage_inactivity(1);
   checkHitEndstops();
   LCD_STATUS;
+  LED_STATUS;
 }
 
 
@@ -847,6 +852,7 @@ FORCE_INLINE void process_commands()
           }
           manage_heater();
           LCD_STATUS;
+          LED_STATUS;
         if(stop_heating_wait) break;
         #ifdef TEMP_RESIDENCY_TIME
             /* start/restart the TEMP_RESIDENCY_TIME timer whenever we reach target temp for the first time
