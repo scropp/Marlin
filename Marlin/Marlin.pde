@@ -265,8 +265,10 @@ void suicide()
 
 void setup()
 { 
-  setup_powerhold();
-  MYSERIAL.begin(BAUDRATE);
+  MSerial.begin(BAUDRATE);
+  #ifdef SECOND_SERIAL
+    SECOND_SERIAL.begin(SECOND_SERIAL_BAUDRATE);
+  #endif
   SERIAL_PROTOCOLLNPGM("start");
   SERIAL_ECHO_START;
 
@@ -323,6 +325,18 @@ void setup()
 
 void loop()
 {
+  #ifdef SECOND_SERIAL
+	if(SECOND_SERIAL.available() && !serial_count)
+	{
+		SerialMgr.ChangeSerial(&SECOND_SERIAL);
+	}else{
+            if(MSerial.available() && !serial_count)
+            {
+				SerialMgr.ChangeSerial(&MSerial);
+            }
+	}
+  #endif
+  
   if(buflen < (BUFSIZE-1))
     get_command();
   #ifdef SDSUPPORT
@@ -364,8 +378,13 @@ void loop()
 
 void get_command() 
 { 
-  while( MYSERIAL.available() > 0  && buflen < BUFSIZE) {
-    serial_char = MYSERIAL.read();
+    #ifdef SECOND_SERIAL
+    while( SerialMgr.cur()->available() > 0  && buflen < BUFSIZE) {
+        serial_char = SerialMgr.cur()->read();
+    #else
+    while( MSerial.available() > 0  && buflen < BUFSIZE) {
+        serial_char = MSerial.read();
+    #endif
     if(serial_char == '\n' || serial_char == '\r' || serial_char == ':' || serial_count >= (MAX_CMD_SIZE - 1) ) 
     {
       if(!serial_count) { //if empty line
@@ -1348,7 +1367,11 @@ void process_commands()
 void FlushSerialRequestResend()
 {
   //char cmdbuffer[bufindr][100]="Resend:";
-  MYSERIAL.flush();
+  #ifdef SECOND_SERIAL
+    SerialMgr.cur()->flush();
+  #else
+    MSerial.flush();
+  #endif
   SERIAL_PROTOCOLPGM(MSG_RESEND);
   SERIAL_PROTOCOLLN(gcode_LastN + 1);
   ClearToSend();
