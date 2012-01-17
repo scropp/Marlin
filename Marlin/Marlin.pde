@@ -237,6 +237,11 @@ void setup_photpin()
 void setup()
 { 
   MSerial.begin(BAUDRATE);
+  #ifdef SECOND_SERIAL
+    SECOND_SERIAL.begin(SECOND_SERIAL_BAUDRATE);
+  #endif
+  
+  
   SERIAL_ECHO_START;
   SERIAL_ECHOLNPGM(VERSION_STRING);
   SERIAL_PROTOCOLLNPGM("start");
@@ -270,6 +275,19 @@ void setup()
 
 void loop()
 {
+  
+  #ifdef SECOND_SERIAL
+	if(SECOND_SERIAL.available() && !serial_count)
+	{
+		SerialMgr.ChangeSerial(&SECOND_SERIAL);
+	}else{
+            if(MSerial.available() && !serial_count)
+            {
+				SerialMgr.ChangeSerial(&MSerial);
+            }
+	}
+  #endif
+  
   if(buflen<3)
     get_command();
   #ifdef SDSUPPORT
@@ -312,8 +330,13 @@ void loop()
 
 FORCE_INLINE void get_command() 
 { 
-  while( MSerial.available() > 0  && buflen < BUFSIZE) {
-    serial_char = MSerial.read();
+    #ifdef SECOND_SERIAL
+    while( SerialMgr.cur()->available() > 0  && buflen < BUFSIZE) {
+        serial_char = SerialMgr.cur()->read();
+    #else
+    while( MSerial.available() > 0  && buflen < BUFSIZE) {
+        serial_char = MSerial.read();
+    #endif
     if(serial_char == '\n' || serial_char == '\r' || serial_char == ':' || serial_count >= (MAX_CMD_SIZE - 1) ) 
     {
       if(!serial_count) return; //if empty line
@@ -1199,7 +1222,11 @@ FORCE_INLINE void process_commands()
 void FlushSerialRequestResend()
 {
   //char cmdbuffer[bufindr][100]="Resend:";
-  MSerial.flush();
+  #ifdef SECOND_SERIAL
+    SerialMgr.cur()->flush();
+  #else
+    MSerial.flush();
+  #endif
   SERIAL_PROTOCOLPGM("Resend:");
   SERIAL_PROTOCOLLN(gcode_LastN + 1);
   ClearToSend();

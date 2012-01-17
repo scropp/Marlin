@@ -36,6 +36,10 @@
 #endif
 
 #include "MarlinSerial.h"
+#ifdef SECOND_SERIAL
+    #include "SerialManager.h" 
+#endif //SECOND_SERIAL
+
 
 #ifndef cbi
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
@@ -59,11 +63,17 @@
 //#define MYPGM(s)  (__extension__({static prog_char __c[]  = (s); &__c[0];})) //this does not work but hides the warnings
 
 
-#define SERIAL_PROTOCOL(x) MSerial.print(x);
-#define SERIAL_PROTOCOLPGM(x) serialprintPGM(MYPGM(x));
-#define SERIAL_PROTOCOLLN(x) {MSerial.print(x);MSerial.write('\n');}
-#define SERIAL_PROTOCOLLNPGM(x) {serialprintPGM(MYPGM(x));MSerial.write('\n');}
-
+#ifdef SECOND_SERIAL
+    #define SERIAL_PROTOCOL(x) SerialMgr.cur()->print(x);
+    #define SERIAL_PROTOCOLPGM(x) serialprintPGM(MYPGM(x));
+    #define SERIAL_PROTOCOLLN(x) {SerialMgr.cur()->print(x);SerialMgr.cur()->write('\n');}
+    #define SERIAL_PROTOCOLLNPGM(x) {serialprintPGM(MYPGM(x));SerialMgr.cur()->write('\n');}
+#else
+    #define SERIAL_PROTOCOL(x) MSerial.print(x);
+    #define SERIAL_PROTOCOLPGM(x) serialprintPGM(MYPGM(x));
+    #define SERIAL_PROTOCOLLN(x) {MSerial.print(x);MSerial.write('\n');}
+    #define SERIAL_PROTOCOLLNPGM(x) {serialprintPGM(MYPGM(x));MSerial.write('\n');}
+#endif
 
 const prog_char errormagic[] PROGMEM ="Error:";
 const prog_char echomagic[] PROGMEM ="echo:";
@@ -89,7 +99,11 @@ FORCE_INLINE void serialprintPGM(const char *str)
   char ch=pgm_read_byte(str);
   while(ch)
   {
-    MSerial.write(ch);
+    #ifdef SECOND_SERIAL
+        SerialMgr.cur()->write(ch);
+    #else
+        MSerial.write(ch);
+    #endif
     ch=pgm_read_byte(++str);
   }
 }

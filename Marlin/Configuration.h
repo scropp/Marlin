@@ -8,6 +8,11 @@
 //#define BAUDRATE 115200
 //#define BAUDRATE 230400
 
+//Do you have a second serial you want activated (for bluetooth as example)
+#define SECOND_SERIAL MSerial1
+#define SECOND_SERIAL_BAUDRATE 115200
+
+
 #define EXTRUDERS 1
 
 // Frequency limit

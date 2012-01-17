@@ -18,7 +18,17 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#define SERIAL MSerial
+#ifdef SECOND_SERIAL
+    #define SERIAL_WRITE(x) SerialMgr.cur()->write(x)
+    #define SERIAL_PRINT(x) SerialMgr.cur()->print(x)
+    #define SERIAL_PRINT2(x,y) SerialMgr.cur()->print(x,y)
+    #define SERIAL_PRINTLN(x) SerialMgr.cur()->println(x)
+#else
+    #define SERIAL_WRITE(x) MSerial.write(x)
+    #define SERIAL_PRINT(x) MSerial.print(x)
+    #define SERIAL_PRINT2(x,y) MSerial.print(x,y)
+    #define SERIAL_PRINTLN(x) MSerial.println(x)
+#endif
 
 #include "Marlin.h"
 #ifdef SDSUPPORT
@@ -345,38 +355,38 @@ int8_t SdBaseFile::lsPrintNext( uint8_t flags, uint8_t indent) {
       && DIR_IS_FILE_OR_SUBDIR(&dir)) break;
   }
   // indent for dir level
-  for (uint8_t i = 0; i < indent; i++) MSerial.write(' ');
+  for (uint8_t i = 0; i < indent; i++) SERIAL_WRITE(' ');
 
   // print name
   for (uint8_t i = 0; i < 11; i++) {
     if (dir.name[i] == ' ')continue;
     if (i == 8) {
-      MSerial.write('.');
+      SERIAL_WRITE('.');
       w++;
     }
-    MSerial.write(dir.name[i]);
+    SERIAL_WRITE(dir.name[i]);
     w++;
   }
   if (DIR_IS_SUBDIR(&dir)) {
-    MSerial.write('/');
+    SERIAL_WRITE('/');
     w++;
   }
   if (flags & (LS_DATE | LS_SIZE)) {
-    while (w++ < 14) MSerial.write(' ');
+    while (w++ < 14) SERIAL_WRITE(' ');
   }
   // print modify date/time if requested
   if (flags & LS_DATE) {
-    MSerial.write(' ');
+    SERIAL_WRITE(' ');
     printFatDate( dir.lastWriteDate);
-    MSerial.write(' ');
+    SERIAL_WRITE(' ');
     printFatTime( dir.lastWriteTime);
   }
   // print size if requested
   if (!DIR_IS_SUBDIR(&dir) && (flags & LS_SIZE)) {
-    MSerial.write(' ');
-    MSerial.print(dir.fileSize);
+    SERIAL_WRITE(' ');
+    SERIAL_PRINT(dir.fileSize);
   }
-  MSerial.println();
+  SERIAL_PRINTLN();
   return DIR_IS_FILE(&dir) ? 1 : 2;
 }
 //------------------------------------------------------------------------------
@@ -947,26 +957,26 @@ void SdBaseFile::printDirName(const dir_t& dir,
   for (uint8_t i = 0; i < 11; i++) {
     if (dir.name[i] == ' ')continue;
     if (i == 8) {
-      MSerial.write('.');
+      SERIAL_WRITE('.');
       w++;
     }
-    MSerial.write(dir.name[i]);
+    SERIAL_WRITE(dir.name[i]);
     w++;
   }
   if (DIR_IS_SUBDIR(&dir) && printSlash) {
-    MSerial.write('/');
+    SERIAL_WRITE('/');
     w++;
   }
   while (w < width) {
-    MSerial.write(' ');
+    SERIAL_WRITE(' ');
     w++;
   }
 }
 //------------------------------------------------------------------------------
 // print uint8_t with width 2
 static void print2u( uint8_t v) {
-  if (v < 10) MSerial.write('0');
-  MSerial.print(v, DEC);
+  if (v < 10) SERIAL_WRITE('0');
+  SERIAL_PRINT2(v, DEC);
 }
 //------------------------------------------------------------------------------
 /** %Print a directory date field to Serial.
@@ -985,10 +995,10 @@ static void print2u( uint8_t v) {
  * \param[in] fatDate The date field from a directory entry.
  */
 void SdBaseFile::printFatDate(uint16_t fatDate) {
-  MSerial.print(FAT_YEAR(fatDate));
-  MSerial.write('-');
+  SERIAL_PRINT(FAT_YEAR(fatDate));
+  SERIAL_WRITE('-');
   print2u( FAT_MONTH(fatDate));
-  MSerial.write('-');
+  SERIAL_WRITE('-');
   print2u( FAT_DAY(fatDate));
 }
 
@@ -1002,9 +1012,9 @@ void SdBaseFile::printFatDate(uint16_t fatDate) {
  */
 void SdBaseFile::printFatTime( uint16_t fatTime) {
   print2u( FAT_HOUR(fatTime));
-  MSerial.write(':');
+  SERIAL_WRITE(':');
   print2u( FAT_MINUTE(fatTime));
-  MSerial.write(':');
+  SERIAL_WRITE(':');
   print2u( FAT_SECOND(fatTime));
 }
 //------------------------------------------------------------------------------
@@ -1016,7 +1026,7 @@ void SdBaseFile::printFatTime( uint16_t fatTime) {
 bool SdBaseFile::printName() {
   char name[13];
   if (!getFilename(name)) return false;
-  MSerial.print(name);
+  SERIAL_PRINT(name);
   return true;
 }
 //------------------------------------------------------------------------------
