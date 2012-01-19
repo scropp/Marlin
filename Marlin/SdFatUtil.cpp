@@ -49,11 +49,7 @@ int SdFatUtil::FreeRam() {
  */
 void SdFatUtil::print_P( PGM_P str) {
   for (uint8_t c; (c = pgm_read_byte(str)); str++) 
-    #ifdef SECOND_SERIAL
-        SerialMgr.cur()->write(c);
-    #else
-        MSerial.write(c);
-    #endif
+    SerialMgr.cur()->write(c);
 }
 //------------------------------------------------------------------------------
 /** %Print a string in flash memory followed by a CR/LF.
@@ -63,11 +59,7 @@ void SdFatUtil::print_P( PGM_P str) {
  */
 void SdFatUtil::println_P( PGM_P str) {
   print_P( str);
-  #ifdef SECOND_SERIAL
-    SerialMgr.cur()->println();
-  #else
-    MSerial.println();
-  #endif
+  SerialMgr.cur()->println();
 }
 //------------------------------------------------------------------------------
 /** %Print a string in flash memory to Serial.

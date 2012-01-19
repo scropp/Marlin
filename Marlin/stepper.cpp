@@ -258,13 +258,8 @@ FORCE_INLINE unsigned short calc_timer(unsigned short step_rate) {
   }
   if(timer < 100) { 
     timer = 100; 
-    #ifdef SECOND_SERIAL
-        SerialMgr.cur()->print("Steprate to high : "); 
-        SerialMgr.cur()->println(step_rate);
-    #else
-        MSerial.print("Steprate to high : "); 
-        MSerial.println(step_rate);
-    #endif
+    SerialMgr.cur()->print("Steprate to high : "); 
+    SerialMgr.cur()->println(step_rate);
    }//(20kHz this should never happen)
   return timer;
 }

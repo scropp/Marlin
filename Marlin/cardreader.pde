@@ -2,6 +2,9 @@
 #include "cardreader.h"
 #ifdef SDSUPPORT
 
+static char fastxferbuffer[SD_FAST_XFER_CHUNK_SIZE + 1];
+static int lastxferchar;
+static long xferbytes;
 
 
 CardReader::CardReader()
@@ -304,6 +307,102 @@ void CardReader::getStatus()
     SERIAL_PROTOCOLLNPGM("Not SD printing");
   }
 }
+
+void CardReader::fast_xfer()
+{
+    char *pstr;
+    boolean done = false;
+    
+    lastxferchar = 1;
+    xferbytes = 0;
+    
+    pstr = strstr(strchr_pointer+4, " ");
+    
+    if(pstr == NULL)
+    {
+      SERIAL_PROTOCOLLNPGM("invalid command");
+      return;
+    }
+    
+    *pstr = '\0';
+    
+    //check mode (currently only RAW is supported
+    if(strcmp(strchr_pointer+4, "RAW") != 0)
+    {
+      SERIAL_PROTOCOLLNPGM("Invalid transfer codec");
+      return;
+    }else{
+      SERIAL_PROTOCOLPGM("Selected codec: ");
+      SERIAL_PROTOCOLLN(strchr_pointer+4);
+    }
+    
+    if (!file.open(&root, pstr+1, O_CREAT | O_APPEND | O_WRITE | O_TRUNC))
+    {
+      SERIAL_PROTOCOLPGM("open failed, File: ");
+      SERIAL_PROTOCOL(pstr+1);
+      SERIAL_PROTOCOLLN(".");
+    }else{
+      SERIAL_PROTOCOLPGM("Writing to file: ");
+      SERIAL_PROTOCOLLN(pstr+1);
+    }
+        
+    SERIAL_PROTOCOLLNPGM("ok");
+    
+    //RAW transfer codec
+    //Host sends \0 then up to SD_FAST_XFER_CHUNK_SIZE then \0
+    //when host is done, it sends \0\0.
+    //if a non \0 character is recieved at the beginning, host has failed somehow, kill the transfer.
+    
+    //read SD_FAST_XFER_CHUNK_SIZE bytes (or until \0 is recieved)
+    while(!done)
+    {
+      while(!SerialMgr.cur()->available())
+      {
+      }
+      if(SerialMgr.cur()->peek() != 0)
+      {
+        //host has failed, this isn't a RAW chunk, it's an actual command
+        file.sync();
+        file.close();
+        return;
+      }
+      //clear the initial 0
+      SerialMgr.cur()->read();
+      for(int i=0;i<SD_FAST_XFER_CHUNK_SIZE+1;i++)
+      {
+        while(!SerialMgr.cur()->available())
+        {
+        }
+        lastxferchar = SerialMgr.cur()->read();
+        //buffer the data...
+        fastxferbuffer[i] = lastxferchar;
+        
+        xferbytes++;
+        
+        if(lastxferchar == 0)
+          break;
+      }
+      
+      if(fastxferbuffer[0] != 0)
+      {
+        fastxferbuffer[SD_FAST_XFER_CHUNK_SIZE] = 0;
+        file.write(fastxferbuffer);
+        SERIAL_PROTOCOLLNPGM("ok");
+      }else{
+        SERIAL_PROTOCOLPGM("Wrote ");
+        SERIAL_PROTOCOL(xferbytes);
+        SERIAL_PROTOCOLLN(" bytes.");
+        done = true;
+      }
+    }
+
+    file.sync();
+    file.close();
+}
+
+
+
+
 void CardReader::write_command(char *buf)
 {
   char* begin = buf;

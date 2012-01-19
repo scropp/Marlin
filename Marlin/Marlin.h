@@ -63,17 +63,10 @@
 //#define MYPGM(s)  (__extension__({static prog_char __c[]  = (s); &__c[0];})) //this does not work but hides the warnings
 
 
-#ifdef SECOND_SERIAL
-    #define SERIAL_PROTOCOL(x) SerialMgr.cur()->print(x);
-    #define SERIAL_PROTOCOLPGM(x) serialprintPGM(MYPGM(x));
-    #define SERIAL_PROTOCOLLN(x) {SerialMgr.cur()->print(x);SerialMgr.cur()->write('\n');}
-    #define SERIAL_PROTOCOLLNPGM(x) {serialprintPGM(MYPGM(x));SerialMgr.cur()->write('\n');}
-#else
-    #define SERIAL_PROTOCOL(x) MSerial.print(x);
-    #define SERIAL_PROTOCOLPGM(x) serialprintPGM(MYPGM(x));
-    #define SERIAL_PROTOCOLLN(x) {MSerial.print(x);MSerial.write('\n');}
-    #define SERIAL_PROTOCOLLNPGM(x) {serialprintPGM(MYPGM(x));MSerial.write('\n');}
-#endif
+#define SERIAL_PROTOCOL(x) SerialMgr.cur()->print(x);
+#define SERIAL_PROTOCOLPGM(x) serialprintPGM(MYPGM(x));
+#define SERIAL_PROTOCOLLN(x) {SerialMgr.cur()->print(x);SerialMgr.cur()->write('\n');}
+#define SERIAL_PROTOCOLLNPGM(x) {serialprintPGM(MYPGM(x));SerialMgr.cur()->write('\n');}
 
 const prog_char errormagic[] PROGMEM ="Error:";
 const prog_char echomagic[] PROGMEM ="echo:";
@@ -99,11 +92,7 @@ FORCE_INLINE void serialprintPGM(const char *str)
   char ch=pgm_read_byte(str);
   while(ch)
   {
-    #ifdef SECOND_SERIAL
-        SerialMgr.cur()->write(ch);
-    #else
-        MSerial.write(ch);
-    #endif
+    SerialMgr.cur()->write(ch);
     ch=pgm_read_byte(++str);
   }
 }

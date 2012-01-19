@@ -23,7 +23,8 @@ public:
   void pauseSDPrint();
   void getStatus();
   void printingHasFinished();
-
+  void fast_xfer();
+  
   void getfilename(const uint8_t nr);
   uint16_t getnrfilenames();
   
@@ -86,6 +87,7 @@ public:
   FORCE_INLINE static void startFilewrite(char *name){};
   FORCE_INLINE static void pauseSDPrint(){};
   FORCE_INLINE static void getStatus(){};
+  FORCE_INLINE static void fast_xfer(){};
   
   FORCE_INLINE static void selectFile(char* name){};
   FORCE_INLINE static void getfilename(const uint8_t nr){};

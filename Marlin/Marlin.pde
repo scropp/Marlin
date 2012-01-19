@@ -23,6 +23,9 @@
  
  It has preliminary support for Matthew Roberts advance algorithm 
     http://reprap.org/pipermail/reprap-dev/2011-May/003323.html
+    
+ Support for dual serial ports (bluetooth) and fast sd transfer is taken
+ from https://github.com/pipakin/Sprinter (pipakins bluetooth branch)
  */
 
 #include "Marlin.h"
@@ -82,7 +85,10 @@
 // M27  - Report SD print status
 // M28  - Start SD write (M28 filename.g)
 // M29  - Stop SD write
-// M30  - Output time since last M109 or SD card start to serial
+// M30  - Fast SD transfer
+// M31  - high speed xfer capabilities 
+// M35  - Output time since last M109 or SD card start to serial
+
 // M42  - Change pin status via gcode
 // M80  - Turn on Power Supply
 // M81  - Turn off Power Supply
@@ -330,13 +336,8 @@ void loop()
 
 FORCE_INLINE void get_command() 
 { 
-    #ifdef SECOND_SERIAL
     while( SerialMgr.cur()->available() > 0  && buflen < BUFSIZE) {
         serial_char = SerialMgr.cur()->read();
-    #else
-    while( MSerial.available() > 0  && buflen < BUFSIZE) {
-        serial_char = MSerial.read();
-    #endif
     if(serial_char == '\n' || serial_char == '\r' || serial_char == ':' || serial_count >= (MAX_CMD_SIZE - 1) ) 
     {
       if(!serial_count) return; //if empty line
@@ -723,8 +724,15 @@ FORCE_INLINE void process_commands()
       //card,saving = false;
       break;
 #endif //SDSUPPORT
-
-    case 30: //M30 take time since the start of the SD print or an M109 command
+    case 30:
+       card.fast_xfer();
+       break;
+    case 31: //M31 - high speed xfer capabilities
+       SERIAL_ECHO_START;
+       SERIAL_ECHO("RAW:");
+       SERIAL_ECHOLN(SD_FAST_XFER_CHUNK_SIZE);
+       break; 
+    case 35: //M35 take time since the start of the SD print or an M109 command
       {
       stoptime=millis();
       char time[30];
@@ -1222,11 +1230,7 @@ FORCE_INLINE void process_commands()
 void FlushSerialRequestResend()
 {
   //char cmdbuffer[bufindr][100]="Resend:";
-  #ifdef SECOND_SERIAL
-    SerialMgr.cur()->flush();
-  #else
-    MSerial.flush();
-  #endif
+  SerialMgr.cur()->flush();
   SERIAL_PROTOCOLPGM("Resend:");
   SERIAL_PROTOCOLLN(gcode_LastN + 1);
   ClearToSend();

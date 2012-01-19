@@ -12,6 +12,9 @@
 #define SECOND_SERIAL MSerial1
 #define SECOND_SERIAL_BAUDRATE 115200
 
+// Chuck size for fast sd transfer
+#define SD_FAST_XFER_CHUNK_SIZE 1024
+
 
 #define EXTRUDERS 1
 
