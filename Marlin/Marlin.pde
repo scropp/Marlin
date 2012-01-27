@@ -34,6 +34,7 @@
 
 #include "ultralcd.h"
 #include "led.h"
+#include "buzzer.h"
 #include "planner.h"
 #include "stepper.h"
 #include "temperature.h"
@@ -275,6 +276,7 @@ void setup()
   #if (LED_PIN > -1)
     led_init();
   #endif
+  buzzer_init();
   setup_photpin();
 }
 
@@ -1195,7 +1197,15 @@ FORCE_INLINE void process_commands()
       SERIAL_ECHO(freeMemory());
     }
     break;
-
+    case 601: //Play tone
+    {
+        int tone = 1915;
+        int duration = 300;
+        if(code_seen('T')) tone = code_value() ;
+        if(code_seen('D')) duration = code_value() ;
+        playTone(tone, duration);
+    }
+    break;
     }
   }
 

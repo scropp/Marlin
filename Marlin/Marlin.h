@@ -36,9 +36,7 @@
 #endif
 
 #include "MarlinSerial.h"
-#ifdef SECOND_SERIAL
-    #include "SerialManager.h" 
-#endif //SECOND_SERIAL
+#include "SerialManager.h" 
 
 
 #ifndef cbi
