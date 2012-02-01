@@ -1,7 +1,12 @@
 #include "ultralcd.h"
 #ifdef ULTRA_LCD
 #include "Marlin.h"
-#include <LiquidCrystal.h>
+#ifdef I2C_LCD  
+  #include "LiquidCrystal_I2C.h"
+#else
+  #include <LiquidCrystal.h>
+#endif
+
 //===========================================================================
 //=============================imported variables============================
 //===========================================================================
@@ -28,8 +33,11 @@ static char messagetext[LCD_WIDTH]="";
 //return for string conversion routines
 static char conv[8];
 
-LiquidCrystal lcd(LCD_PINS_RS, LCD_PINS_ENABLE, LCD_PINS_D4, LCD_PINS_D5,LCD_PINS_D6,LCD_PINS_D7);  //RS,Enable,D4,D5,D6,D7 
-
+#ifdef I2C_LCD
+    LiquidCrystal_I2C lcd(I2C_LCD, LCD_WIDTH, LCD_HEIGHT);  //RS,Enable,D4,D5,D6,D7 
+#else
+    LiquidCrystal lcd(LCD_PINS_RS, LCD_PINS_ENABLE, LCD_PINS_D4, LCD_PINS_D5,LCD_PINS_D6,LCD_PINS_D7);  //RS,Enable,D4,D5,D6,D7 
+#endif
 static unsigned long previous_millis_lcd=0;
 //static long previous_millis_buttons=0;
 

@@ -89,7 +89,7 @@ CDEFS = -DF_CPU=$(BUILD_F_CPU) -DARDUINO=23
 CXXDEFS = -DF_CPU=$(BUILD_F_CPU) -DARDUINO=23
 
 # Place -I options here
-CINCS = -I$(ARDUINO) -I$(INSTALL_DIR)/libraries/LiquidCrystal/ -I$(INSTALL_DIR)/libraries/EEPROM/
+CINCS = -I$(ARDUINO) -I$(INSTALL_DIR)/libraries/LiquidCrystal/ -I$(INSTALL_DIR)/libraries/EEPROM/ -I$(INSTALL_DIR)/libraries/Wire/
 CXXINCS = -I$(ARDUINO)
 
 # Compiler flag to set the C Standard level.

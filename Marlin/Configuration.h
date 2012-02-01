@@ -325,12 +325,14 @@ const bool Z_ENDSTOPS_INVERTING = false; // set to true to invert the logic of t
 
 
 //LCD and SD support
-//#define ULTRA_LCD  //general lcd support, also 16x2
 #define SDSUPPORT // Enable SD Card Support in Hardware Console
 #define SD_FINISHED_STEPPERRELEASE true  //if sd support and the file is finished: disable steppers?
 #define SD_FINISHED_RELEASECOMMAND "M84 X Y E" // no z because of layer shift.
 
+#define I2C_LCD 0x27
+#define ULTRA_LCD  //general lcd support, also 16x2
 //#define ULTIPANEL
+
 #ifdef ULTIPANEL
   //#define NEWPANEL  //enable this if you have a click-encoder panel
   #define SDSUPPORT
@@ -343,6 +345,8 @@ const bool Z_ENDSTOPS_INVERTING = false; // set to true to invert the logic of t
     #define LCD_HEIGHT 2
   #endif
 #endif
+
+
 
 // A debugging feature to compare calculated vs performed steps, to see if steps are lost by the software.
 //#define DEBUG_STEPS
