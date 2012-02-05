@@ -430,7 +430,11 @@ void MainMenu::showStatus()
     encoderpos=feedmultiply;
     lcd.setCursor(0,0);lcdprintPGM("\002123/567\001 ");
     #if defined BED_USES_THERMISTOR || defined BED_USES_AD595 
-    lcd.setCursor(10,0);lcdprintPGM("B123/567\001 ");
+        #if (LCD_WIDTH >= 20)
+            lcd.setCursor(10,0);lcdprintPGM("B123/567\001 ");
+        #else
+            lcd.setCursor(10,0);lcdprintPGM("B123\001 ");
+        #endif
     #endif
   }
     
@@ -450,6 +454,27 @@ void MainMenu::showStatus()
     lcd.print(ftostr3(ttHotEnd0));
     oldtargetHotEnd0=ttHotEnd0;
   }
+  
+  #if defined BED_USES_THERMISTOR || defined BED_USES_AD595 
+    static int oldtBed=-1;
+    int tBed=intround(degBed());
+    if((tBed!=oldtBed)||force_lcd_update)
+    {
+      lcd.setCursor(11,0);
+      lcd.print(ftostr3(tBed));
+      oldtBed=tBed;
+    }
+    #if (LCD_WIDTH >= 20)
+        static int oldtargetBed=-1; 
+        int targetBed=intround(degTargetBed());
+        if((targetBed!=oldtargetBed)||force_lcd_update)
+        {
+          lcd.setCursor(15,0);
+          lcd.print(ftostr3(targetBed));
+          oldtargetBed=targetBed;
+        }
+    #endif
+  #endif
 
   if(messagetext[0]!='\0')
   {

@@ -992,7 +992,7 @@ FORCE_INLINE void process_commands()
               disable_e2();
             }
           #endif 
-          LCD_MESSAGEPGM("Partial Release");
+          //LCD_MESSAGEPGM("Partial Release");
         }
       }
       break;
@@ -1008,7 +1008,7 @@ FORCE_INLINE void process_commands()
       }
       break;
     case 115: // M115
-      SerialprintPGM("FIRMWARE_NAME:Marlin; Sprinter/grbl mashup for gen6 FIRMWARE_URL:http://www.mendel-parts.com PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1");
+      SerialprintPGM("FIRMWARE_NAME:Marlin; Sprinter/grbl mashup for gen6 ported to Melzi FIRMWARE_URL:http://www.reprappro.com PROTOCOL_VERSION:1.0 MACHINE_TYPE:Huxley EXTRUDER_COUNT:1");
       break;
     case 117: // M117 display message
       LCD_MESSAGE(cmdbuffer[bufindr]+5);
