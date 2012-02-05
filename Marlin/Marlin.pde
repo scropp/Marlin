@@ -29,7 +29,7 @@
  */
 
 #include "Marlin.h"
-
+#include <Wire.h>
 
 
 #include "ultralcd.h"
@@ -278,6 +278,9 @@ void setup()
   #endif
   buzzer_init();
   setup_photpin();
+  #ifdef ULTRA_LCD
+    lcd_init();
+  #endif
 }
 
 

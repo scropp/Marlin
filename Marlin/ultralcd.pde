@@ -34,7 +34,7 @@ static char messagetext[LCD_WIDTH]="";
 static char conv[8];
 
 #ifdef I2C_LCD
-    LiquidCrystal_I2C lcd(I2C_LCD, LCD_WIDTH, LCD_HEIGHT);  //RS,Enable,D4,D5,D6,D7 
+    LiquidCrystal_I2C lcd(I2C_LCD, LCD_WIDTH, LCD_HEIGHT);  
 #else
     LiquidCrystal lcd(LCD_PINS_RS, LCD_PINS_ENABLE, LCD_PINS_D4, LCD_PINS_D5,LCD_PINS_D6,LCD_PINS_D7);  //RS,Enable,D4,D5,D6,D7 
 #endif
@@ -98,7 +98,6 @@ FORCE_INLINE void clear()
 
 void lcd_init()
 {
-  //beep();
   byte Degree[8] =
   {
     B01100,
@@ -124,13 +123,21 @@ void lcd_init()
   byte uplevel[8]={0x04, 0x0e, 0x1f, 0x04, 0x1c, 0x00, 0x00, 0x00};//thanks joris
   byte refresh[8]={0x00, 0x06, 0x19, 0x18, 0x03, 0x13, 0x0c, 0x00}; //thanks joris
   byte folder [8]={0x00, 0x1c, 0x1f, 0x11, 0x11, 0x1f, 0x00, 0x00}; //thanks joris
-  lcd.begin(LCD_WIDTH, LCD_HEIGHT);
+  
+  #ifdef I2C_LCD
+    lcd.init();
+    lcd.backlight();
+  #else
+    lcd.begin(LCD_WIDTH, LCD_HEIGHT);
+  #endif
+  
   lcd.createChar(1,Degree);
   lcd.createChar(2,Thermometer);
   lcd.createChar(3,uplevel);
   lcd.createChar(4,refresh);
   lcd.createChar(5,folder);
-  LCD_MESSAGEPGM("UltiMarlin ready.");
+  LCD_MESSAGEPGM(LCD_READY_MSG);
+  menu.start();
 }
 
 
@@ -290,15 +297,20 @@ void buttons_check()
 MainMenu::MainMenu()
 {
   status=Main_Status;
+  _initiated = false;
   displayStartingRow=0;
   activeline=0;
   force_lcd_update=true;
   #ifdef ULTIPANEL
     buttons_init();
   #endif
-  lcd_init();
   linechanging=false;
   tune=false;
+}
+
+void MainMenu::start()
+{
+    _initiated = true;
 }
 
 void MainMenu::showStatus()
@@ -1747,6 +1759,9 @@ void MainMenu::showMainMenu()
 
 void MainMenu::update()
 {
+  if (!_initiated)
+    return;
+    
   static MainStatus oldstatus=Main_Menu;  //init automatically causes foce_lcd_update=true
   static long timeoutToStatus=0;
   static bool oldcardstatus=false;

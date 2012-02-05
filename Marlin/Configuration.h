@@ -324,14 +324,16 @@ const bool Z_ENDSTOPS_INVERTING = false; // set to true to invert the logic of t
 #endif // ADVANCE
 
 
-//LCD and SD support
+//SD support
 #define SDSUPPORT // Enable SD Card Support in Hardware Console
 #define SD_FINISHED_STEPPERRELEASE true  //if sd support and the file is finished: disable steppers?
 #define SD_FINISHED_RELEASECOMMAND "M84 X Y E" // no z because of layer shift.
 
+//LCD support
 #define I2C_LCD 0x27
 #define ULTRA_LCD  //general lcd support, also 16x2
 //#define ULTIPANEL
+#define LCD_READY_MSG "Huxley ready." //Displayed at start
 
 #ifdef ULTIPANEL
   //#define NEWPANEL  //enable this if you have a click-encoder panel

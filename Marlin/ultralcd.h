@@ -66,6 +66,7 @@
     MainStatus status;
     uint8_t displayStartingRow;
     
+    void start();
     void showStatus();
     void showMainMenu();
     void showPrepare();
@@ -84,6 +85,9 @@
     bool tune;
     
   private:
+    bool _initiated;
+    
+    
     FORCE_INLINE void updateActiveLines(const uint8_t &maxlines,volatile int &encoderpos)
     {
       if(linechanging) return; // an item is changint its value, do not switch lines hence
