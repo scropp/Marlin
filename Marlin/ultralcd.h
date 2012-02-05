@@ -3,7 +3,7 @@
 #include "Marlin.h"
 #ifdef ULTRA_LCD
   #ifdef I2C_LCD  
-    #include "LiquidCrystal_I2C.h"
+    #include "MLiquidCrystal_I2C.h"
   #else
     #include <LiquidCrystal.h>
   #endif

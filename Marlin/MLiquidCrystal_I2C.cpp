@@ -5,7 +5,7 @@
 //Support Forum: http://www.dfrobot.com/forum/
 
 
-#include "LiquidCrystal_I2C.h"
+#include "MLiquidCrystal_I2C.h"
 #include <inttypes.h>
 #include "WProgram.h" 
 #include "Wire.h"
