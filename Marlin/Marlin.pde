@@ -169,7 +169,7 @@ static bool fromsd[BUFSIZE];
 static int bufindr = 0;
 static int bufindw = 0;
 static int buflen = 0;
-static int i = 0;
+//static int i = 0;
 static char serial_char;
 static int serial_count = 0;
 static boolean comment_mode = false;
@@ -308,14 +308,37 @@ void setup_photpin()
     #endif
   #endif 
 }
+
 void setup_probepin()
 {
   #if PROBE_PIN > -1
     SET_INPUT(PROBE_PIN);
   #endif
 }
+
+void setup_powerhold()
+{
+ #ifdef SUICIDE_PIN
+    #if (SUICIDE_PIN> -1) 
+      SET_OUTPUT(SUICIDE_PIN);
+      WRITE(SUICIDE_PIN, HIGH);
+    #endif
+  #endif
+}
+
+void suicide()
+{
+ #ifdef SUICIDE_PIN
+    #if (SUICIDE_PIN> -1) 
+      SET_OUTPUT(SUICIDE_PIN);
+      WRITE(SUICIDE_PIN, LOW);
+    #endif
+  #endif
+}
+
 void setup()
 { 
+  setup_powerhold();
   MSerial.begin(BAUDRATE);
   #ifdef SECOND_SERIAL
     SECOND_SERIAL.begin(SECOND_SERIAL_BAUDRATE);
@@ -412,7 +435,7 @@ void loop()
 }
 
 
-FORCE_INLINE void get_command() 
+void get_command() 
 { 
     while( SerialMgr.cur()->available() > 0  && buflen < BUFSIZE) {
         serial_char = SerialMgr.cur()->read();
@@ -559,20 +582,20 @@ FORCE_INLINE void get_command()
 }
 
 
-FORCE_INLINE float code_value() 
+float code_value() 
 { 
   return (strtod(&cmdbuffer[bufindr][strchr_pointer - cmdbuffer[bufindr] + 1], NULL)); 
 }
-FORCE_INLINE long code_value_long() 
+long code_value_long() 
 { 
   return (strtol(&cmdbuffer[bufindr][strchr_pointer - cmdbuffer[bufindr] + 1], NULL, 10)); 
 }
-FORCE_INLINE bool code_seen(char code_string[]) //Return True if the string was found
+bool code_seen(char code_string[]) //Return True if the string was found
 { 
   return (strstr(cmdbuffer[bufindr], code_string) != NULL); 
 }  
 
-FORCE_INLINE bool code_seen(char code)
+bool code_seen(char code)
 {
   strchr_pointer = strchr(cmdbuffer[bufindr], code);
   return (strchr_pointer != NULL);  //Return True if a character was found
@@ -604,7 +627,7 @@ FORCE_INLINE bool code_seen(char code)
     endstops_hit_on_purpose();\
   }
 
-FORCE_INLINE void process_commands()
+void process_commands()
 {
   unsigned long codenum; //throw away variable
   char *starpos = NULL;
@@ -1026,6 +1049,8 @@ G1 Z5 F200	;Lift Z out of way
               {
                  SERIAL_PROTOCOLLN( "?" );
               }
+            #else
+              SERIAL_PROTOCOLLN("");
             #endif
             codenum = millis();
           }
@@ -1097,10 +1122,19 @@ G1 Z5 F200	;Lift Z out of way
       case 80: // M80 - ATX Power On
         SET_OUTPUT(PS_ON_PIN); //GND
         break;
+      #endif
+      
       case 81: // M81 - ATX Power Off
-        SET_INPUT(PS_ON_PIN); //Floating
-        break;
-    #endif
+      
+      #if (SUICIDE_PIN >-1)
+        st_synchronize();
+        suicide();
+      #else
+        #if (PS_ON_PIN > -1) 
+          SET_INPUT(PS_ON_PIN); //Floating
+        #endif
+      #endif
+        
     case 82:
       axis_relative_modes[3] = false;
       break;
@@ -1402,7 +1436,7 @@ void ClearToSend()
   SERIAL_PROTOCOLLNPGM("ok"); 
 }
 
-FORCE_INLINE void get_coordinates()
+void get_coordinates()
 {
   for(int8_t i=0; i < NUM_AXIS; i++) {
     if(code_seen(axis_codes[i])) destination[i] = (float)code_value() + (axis_relative_modes[i] || relative_mode)*current_position[i];
@@ -1414,7 +1448,7 @@ FORCE_INLINE void get_coordinates()
   }
 }
 
-FORCE_INLINE void get_arc_coordinates()
+void get_arc_coordinates()
 {
    get_coordinates();
    if(code_seen('I')) offset[0] = code_value();
@@ -1514,6 +1548,7 @@ void kill()
   SERIAL_ERROR_START;
   SERIAL_ERRORLNPGM("Printer halted. kill() called !!");
   LCD_MESSAGEPGM("KILLED. ");
+  suicide();
   while(1); // Wait for reset
 }
 
