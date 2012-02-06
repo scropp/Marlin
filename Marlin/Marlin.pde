@@ -303,16 +303,18 @@ void setup_photpin()
 {
   #ifdef PHOTOGRAPH_PIN
     #if (PHOTOGRAPH_PIN > -1)
-    SET_OUTPUT(PHOTOGRAPH_PIN);
-    WRITE(PHOTOGRAPH_PIN, LOW);
+      SET_OUTPUT(PHOTOGRAPH_PIN);
+      WRITE(PHOTOGRAPH_PIN, LOW);
     #endif
   #endif 
 }
 
 void setup_probepin()
 {
-  #if PROBE_PIN > -1
-    SET_INPUT(PROBE_PIN);
+  #ifdef PROBE_PIN
+    #if (PROBE_PIN > -1)
+      SET_INPUT(PROBE_PIN);
+    #endif
   #endif
 }
 
