@@ -35,6 +35,7 @@
 #include "ultralcd.h"
 #include "led.h"
 #include "buzzer.h"
+#include "z_probe.h"
 #include "planner.h"
 #include "stepper.h"
 #include "temperature.h"
@@ -145,14 +146,15 @@ float add_homeing[3]={0,0,0};
 uint8_t active_extruder = 0;
 bool stop_heating_wait=false;
 
+float destination[NUM_AXIS] = {  0.0, 0.0, 0.0, 0.0};
+float offset[3] = {0.0, 0.0, 0.0};
+float feedrate = 1500.0, next_feedrate, saved_feedrate;
+
 //===========================================================================
 //=============================private variables=============================
 //===========================================================================
 const char axis_codes[NUM_AXIS] = {'X', 'Y', 'Z', 'E'};
-static float destination[NUM_AXIS] = {  0.0, 0.0, 0.0, 0.0};
-static float offset[3] = {0.0, 0.0, 0.0};
 static bool home_all_axis = true;
-static float feedrate = 1500.0, next_feedrate, saved_feedrate;
 static long gcode_N, gcode_LastN;
 
 
@@ -195,73 +197,6 @@ static uint8_t tmp_extruder;
 //===========================================================================
 //=============================ROUTINES=============================
 //===========================================================================
-//Crash1 - Probes bed at least twice until distances are similar then takes average of 2
-float Probe_Bed(float x_pos, float y_pos) {    //returns Probed Z average height
-        float ProbeDepth[6], ProbeDepthAvg;
-        if (PROBE_PIN > -1 && Z_HOME_DIR==-1){
-         saved_feedrate = feedrate;        
-
-         destination[Z_AXIS] = 3; //* Z_HOME_DIR;  //Lift over bed for initial Move
-         feedrate = homing_feedrate[Z_AXIS];
-         prepare_move();
-        
-         //Move to Probe Coordinates, Use current Position if none given
-         if (x_pos < 0) {destination[X_AXIS] = current_position[X_AXIS];}
-         else {destination[X_AXIS] = x_pos;}   
-         if (y_pos < 0) {destination[Y_AXIS] = current_position[Y_AXIS];}
-         else {destination[Y_AXIS] = y_pos;}
-         feedrate = 7500; // 500 is way too slow- WTF  - max_feedrate[X_AXIS]; //homing_feedrate[X_AXIS]; //250;
-         prepare_move();
-        
-         destination[Z_AXIS] = .75; //* Z_HOME_DIR;  //move close to Z Home - bed should be within .75mm of level 
-         feedrate = homing_feedrate[Z_AXIS];
-         prepare_move();
-         
-        //Plunge down final distance slowly until bed breaks contact and pin true
-        //*******************************************************************************************Bed Loop*************************************
-         for(int8_t i=0; i < 2 ; i++) {    //probe 2 or more times to get repeatable reading    
-         //2DO If bed currently true then it is stuck - need to do something smart here.         
-          int z = 0;
-          while(READ(PROBE_PIN) == false && z < 500){  //if it takes more than 500 steps then something is wrong
-            destination[Z_AXIS] = current_position[Z_AXIS] - Z_INCREMENT; //* Z_HOME_DIR;
-            feedrate = homing_feedrate[Z_AXIS];
-            prepare_move();
-            z++;
-          }
-          //move up in small increments until switch makes
-          z = 0;
-          while(READ(PROBE_PIN) == true && z < 200){  //if it takes more than 100 steps then bed is likely stuck - still need to error on this to stop process
-            destination[Z_AXIS] = current_position[Z_AXIS] + Z_INCREMENT; //* Z_HOME_DIR;
-            feedrate = homing_feedrate[Z_AXIS];
-            prepare_move(); 
-            z++;
-          }
-//**************************************************************************************************************************************************          
-          //if Z is 200 here then we have a stuck bed and it will keep on advancing upward. So send hot end toward Zstop to try to unstick.
-          if (z == 200) {
-            SERIAL_ECHOLN("Poking Stuck Bed:"); 
-            destination[Z_AXIS] = 1; feedrate = homing_feedrate[Z_AXIS]; prepare_move();
-            destination[Z_AXIS] = .2; feedrate = homing_feedrate[Z_AXIS]; prepare_move();
-            destination[Z_AXIS] = 1; feedrate = homing_feedrate[Z_AXIS]; prepare_move();
-            i--; //Throw out this meaningless probe
-            z == 0;
-          }  
- //*************************************************************************************************************
-          ProbeDepth[i]= current_position[Z_AXIS];
-          if (i == 1 ) {
-            if (abs(ProbeDepth[i] - ProbeDepth[i - 1]) > .02) {     //keep going until readings match to avoid sticky bed
-              SERIAL_ECHO("Probing again - difference:"); SERIAL_ECHOLN(abs(ProbeDepth[i] - ProbeDepth[i - 1]));
-              i--; i--;    //Throw out both that don't match because we don't know which one is accurate
-            }
-          }  
-          feedrate = 0;
-        } //end probe loop
-      }
-      ProbeDepthAvg = (ProbeDepth[0] + ProbeDepth[1]) / 2;
-      SERIAL_ECHO("Z="); SERIAL_ECHOLN(ProbeDepthAvg); 
-      return ProbeDepthAvg;
-      }
-//Crash1 END Add Probe Bed Function
 
 void get_arc_coordinates();
 
@@ -307,15 +242,6 @@ void setup_photpin()
       WRITE(PHOTOGRAPH_PIN, LOW);
     #endif
   #endif 
-}
-
-void setup_probepin()
-{
-  #ifdef PROBE_PIN
-    #if (PROBE_PIN > -1)
-      SET_INPUT(PROBE_PIN);
-    #endif
-  #endif
 }
 
 void setup_powerhold()
@@ -374,9 +300,9 @@ void setup()
   #if (LED_PIN > -1)
     led_init();
   #endif
-  buzzer_init();
+  buzzer_init(); //Initializes buzzer if BUZZER_PIN is defined
+  probe_init(); //Initializes probe if PROBE_PIN is defined
   setup_photpin();
-  setup_probepin();
   #ifdef ULTRA_LCD
     lcd_init();
   #endif
@@ -737,77 +663,13 @@ void process_commands()
       previous_millis_cmd = millis();
       endstops_hit_on_purpose();
       break;
-/*Crash1 - G29 to Probe and stop on Bed
-G29 will probe bed at least twice at 3 points and take an average. G30 will probe bed at it's current location.
-Z stop should be set slightly below bed height. Solder stub wire to each hole in huxley bed and attach a ring terminal under spring.
-Wire bed probe to A2 on Melzi and duplicate cap/resistor circuit in schematic.
-  
-Use something like this in the start.gcode file:
-G29 		;Probe bed for Z height
-G92 Z0		;Set Z to Probed Depth
-G1 Z5 F200	;Lift Z out of way
-*/
-     case 29: 
-       float Probe_Avg, Point1, Point2, Point3;
-       Point1 = Probe_Bed(15, 15);
-       Point2 = Probe_Bed(15, Y_MAX_LENGTH - 15);
-       Point3 = Probe_Bed(X_MAX_LENGTH - 15, Y_MAX_LENGTH/2) ;
-       Probe_Avg = (Point1 + Point2 + Point3) / 3;
-       destination[2] = Probe_Avg;
-       feedrate = homing_feedrate[Z_AXIS];
-       prepare_move();
-       SERIAL_ECHOLN("**************************************");       
-       SERIAL_ECHO("Point1 ="); SERIAL_ECHOLN(Point1);
-       SERIAL_ECHO("Point2 ="); SERIAL_ECHOLN(Point2);
-       SERIAL_ECHO("Point3 ="); SERIAL_ECHOLN(Point3);
-       SERIAL_ECHO("Probed Average="); SERIAL_ECHOLN(Probe_Avg);
-       SERIAL_ECHOLN("**************************************");       
-       break;
-  
-     case 30:   //Probe Single Point and then lift 1mm
-       float  Point;
-       Point = Probe_Bed(-1,-1);
-       destination[2] = Point +1;
-       feedrate = homing_feedrate[Z_AXIS];
-       prepare_move();
-       SERIAL_ECHOLN("**************************************");       
-       SERIAL_ECHO("Probed Z="); SERIAL_ECHOLN(Point);
-       break;
-//Old Sprinter Code
-/*     case 29: //G29 to probe and stop
-        saved_feedrate = feedrate;
-        if (PROBE_PIN > -1 && Z_HOME_DIR==-1){
-          current_position[2] = 0;  
-          destination[2] = 1.5 * Z_MAX_LENGTH * Z_HOME_DIR;
-          feedrate = homing_feedrate[2];
-          prepare_move();
-          
-          //move up in small increments until switch makes
-          int z=0;
-          current_position[2] = 0; 
-          SERIAL_ECHO_START;
-          SERIAL_ECHO("ZProbe=");
-          SERIAL_ECHOLN(READ(PROBE_PIN));
-          while(READ(PROBE_PIN) == true && z<400){  
-            SERIAL_ECHO("ZProbeLoop=");
-            SERIAL_ECHO(z);
-            SERIAL_ECHO("    Status=");
-            SERIAL_ECHOLN(READ(PROBE_PIN));
-            destination[2] = current_position[2] - Z_INCREMENT * Z_HOME_DIR;
-            prepare_move();
-            z++;
-          }
-          SERIAL_ECHO("Z=");
-          SERIAL_ECHOLN(current_position[2]);
-          //current_position[2] = (Z_HOME_DIR == -1) ? 0 : Z_MAX_LENGTH;
-          //destination[2] = current_position[2];
-          feedrate = 0;
-        }
+    case 29:
+        probe_3points();
         break;
- */
- //Crash1 End G29 Probe
-     
-     case 90: // G90
+    case 30:
+        probe_1point();
+        break;
+    case 90: // G90
       relative_mode = false;
       break;
     case 91: // G91
@@ -822,7 +684,7 @@ G1 Z5 F200	;Lift Z out of way
            if(i == E_AXIS) {
              current_position[i] = code_value();  
              plan_set_e_position(current_position[E_AXIS]);
-           }
+           } 
            else {
              current_position[i] = code_value()+add_homeing[i];  
              plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);

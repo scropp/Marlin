@@ -174,6 +174,11 @@ extern float current_position[NUM_AXIS] ;
 extern float add_homeing[3];
 extern bool stop_heating_wait;
 
+extern float destination[NUM_AXIS];
+extern float offset[3];
+extern float feedrate, next_feedrate, saved_feedrate;
+
+
 // Handling multiple extruders pins
 extern uint8_t active_extruder;
 
