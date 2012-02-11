@@ -758,10 +758,10 @@ void process_commands()
       //processed in write to file routine above
       //card,saving = false;
       break;
-#endif //SDSUPPORT
     case 30:
        card.fast_xfer();
        break;
+#endif //SDSUPPORT
     case 31: //M31 - high speed xfer capabilities
        SERIAL_ECHO_START;
        SERIAL_ECHO("RAW:");
