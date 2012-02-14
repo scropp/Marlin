@@ -35,20 +35,18 @@ float Probe_Bed(float x_pos, float y_pos)
         //*******************************************************************************************Bed Loop*************************************
         for(int8_t i=0; i < 2 ; i++) 
         {    //probe 2 or more times to get repeatable reading    
-            //2DO If bed currently true then it is stuck - need to do something smart here.  
-            int probeSteps = 500;  //distance to move down and max distance to scan up in one step.
+            //2DO If bed currently true then it is stuck - need to do something smart here.         
             int z = 0;
-            while(READ(PROBE_PIN) == false && z < probeSteps)
+            while(READ(PROBE_PIN) == false && z < 500)
             {  //if it takes more than 500 steps then something is wrong
                 destination[Z_AXIS] = current_position[Z_AXIS] - Z_INCREMENT; //* Z_HOME_DIR;
                 feedrate = homing_feedrate[Z_AXIS];
                 prepare_move();
                 z++;
-                delay(1);
             }
               //move up in small increments until switch makes
             z = 0;
-            while(READ(PROBE_PIN) == true && z < probeSteps)
+            while(READ(PROBE_PIN) == true && z < 200)
             {  //if it takes more than 100 steps then bed is likely stuck - still need to error on this to stop process
                 destination[Z_AXIS] = current_position[Z_AXIS] + Z_INCREMENT; //* Z_HOME_DIR;
                 feedrate = homing_feedrate[Z_AXIS];
@@ -56,8 +54,8 @@ float Probe_Bed(float x_pos, float y_pos)
                 z++;
             }
             //**************************************************************************************************************************************************          
-            //if Z is probeSteps here then we have a stuck bed and it will keep on advancing upward. So send hot end toward Zstop to try to unstick.
-            if (z == probeSteps) 
+            //if Z is 200 here then we have a stuck bed and it will keep on advancing upward. So send hot end toward Zstop to try to unstick.
+            if (z == 200) 
             {
                 SERIAL_ECHOLN("Poking Stuck Bed:"); 
                 destination[Z_AXIS] = 1; feedrate = homing_feedrate[Z_AXIS]; prepare_move();
@@ -73,7 +71,7 @@ float Probe_Bed(float x_pos, float y_pos)
                 if (abs(ProbeDepth[i] - ProbeDepth[i - 1]) > .02) 
                 {     //keep going until readings match to avoid sticky bed
                     SERIAL_ECHO("Probing again - difference:"); SERIAL_ECHOLN(abs(ProbeDepth[i] - ProbeDepth[i - 1]));
-                    i -= 2;    //Throw out both that don't match because we don't know which one is accurate
+                    i--; i--;    //Throw out both that don't match because we don't know which one is accurate
                 }
             }  
             feedrate = 0;

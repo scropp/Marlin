@@ -332,7 +332,7 @@ const bool Z_ENDSTOPS_INVERTING = false; // set to true to invert the logic of t
 
 
 //SD support
-//#define SDSUPPORT // Enable SD Card Support in Hardware Console
+#define SDSUPPORT // Enable SD Card Support in Hardware Console
 #define SD_FINISHED_STEPPERRELEASE true  //if sd support and the file is finished: disable steppers?
 #define SD_FINISHED_RELEASECOMMAND "M84 X Y E" // no z because of layer shift.
 
