@@ -46,7 +46,7 @@
 
 
 
-#define VERSION_STRING  "1.0.0 Beta 1"
+#define VERSION_STRING  "1.0.0 Beta 1 (SNC)"
 
 
 
