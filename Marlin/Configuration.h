@@ -380,7 +380,7 @@ const bool Z_ENDSTOPS_INVERTING = false; // set to true to invert the logic of t
 
 //this prevents dangerous Extruder moves, i.e. if the temperature is under the limit
 //can be software-disabled for whatever purposes by
-#define PREVENT_DANGEROUS_EXTRUDE
+//#define PREVENT_DANGEROUS_EXTRUDE
 #define EXTRUDE_MINTEMP 140
 #define EXTRUDE_MAXLENGTH 301 //prevent extrusion of very large distances.
 
