@@ -129,6 +129,10 @@ void probe_1point()
     SERIAL_ECHO("Probed Z="); SERIAL_ECHOLN(Point);
 }
 
+void probe_status()
+{
+    SERIAL_ECHO("Probe Status = "); SERIAL_ECHOLN(READ(PROBE_PIN));
+}
 
 #endif //defined(PROBE_PIN) > -1
 

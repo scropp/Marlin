@@ -7,11 +7,13 @@
   void probe_init();
   void probe_3points();
   void probe_1point();
+  void probe_status();
   
 #else //no probe pin
   FORCE_INLINE void probe_init() {};
   FORCE_INLINE void probe_3points() {};
   FORCE_INLINE void probe_1point() {};
+  FORCE_INLINE void probe_status() {};
 #endif //PROBE_PIN
 
 #endif

@@ -62,6 +62,9 @@
 // G3  - CCW ARC
 // G4  - Dwell S<seconds> or P<milliseconds>
 // G28 - Home all Axis
+// G29 - Detailed Z-Probe (3 location test)
+// G30 - Single Z Probe (probe current location)
+// G31 - Report Curent Probe status
 // G90 - Use Absolute Coordinates
 // G91 - Use Relative Coordinates
 // G92 - Set current position to cordinates given
@@ -668,6 +671,9 @@ void process_commands()
         break;
     case 30:
         probe_1point();
+        break;
+    case 31:
+        probe_status();
         break;
     case 90: // G90
       relative_mode = false;
