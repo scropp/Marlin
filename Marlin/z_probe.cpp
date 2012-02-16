@@ -71,7 +71,7 @@ float Probe_Bed(float x_pos, float y_pos)
             {
                 if (abs(ProbeDepth[i] - ProbeDepth[i - 1]) > .02) 
                 {     //keep going until readings match to avoid sticky bed
-                    SERIAL_ECHO("Probing again - difference:"); SERIAL_ECHOLN(abs(ProbeDepth[i] - ProbeDepth[i - 1]));
+                    SERIAL_ECHO("Probing again - difference:"); SERIAL_ECHO(abs(ProbeDepth[i] - ProbeDepth[i - 1])); SERIAL_ECHO(", Z="); SERIAL_ECHOLN(ProbeDepth[i]); 
                     i -= 2;    //Throw out both that don't match because we don't know which one is accurate
                 }
             }  
