@@ -525,6 +525,8 @@
 #define SDPOWER            -1
 #define SDSS               31
 
+#define UMFPUSUPPORT_CS_PIN 30
+
 #endif
 
 
