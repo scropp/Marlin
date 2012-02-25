@@ -357,6 +357,7 @@ class UMFPU
     void write(byte, byte, byte, byte);
     void write(byte, byte, byte, byte, byte);
     void write(byte, byte, byte, byte, byte, byte);
+    void write(byte, byte, byte, byte, byte, byte, byte, byte, byte, byte, byte, byte, byte, byte, byte, byte, byte, byte, byte);
     void writeWord(int);
     void writeLong(long);
     void writeFloat(float);
