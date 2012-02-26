@@ -157,6 +157,33 @@ void UMFPU::write(byte b1, byte b2, byte b3, byte b4, byte b5, byte b6)
   digitalWrite(_cs, HIGH);
 }
 
+void UMFPU::write(byte b1, byte b2, byte b3, byte b4, byte b5, byte b6, byte b7, byte b8)
+{
+  digitalWrite(_cs, LOW);
+  SPI.transfer(b1);
+  SPI.transfer(b2);
+  SPI.transfer(b3);
+  SPI.transfer(b4);
+  SPI.transfer(b5);
+  SPI.transfer(b6);
+  SPI.transfer(b7);
+  SPI.transfer(b8);
+  digitalWrite(_cs, HIGH);
+}
+
+void UMFPU::write(byte b1, byte b2, byte b3, byte b4, byte b5, byte b6, byte b7)
+{
+  digitalWrite(_cs, LOW);
+  SPI.transfer(b1);
+  SPI.transfer(b2);
+  SPI.transfer(b3);
+  SPI.transfer(b4);
+  SPI.transfer(b5);
+  SPI.transfer(b6);
+  SPI.transfer(b7);
+  digitalWrite(_cs, HIGH);
+}
+
 void UMFPU::write(byte b1, byte b2, byte b3, byte b4, byte b5, byte b6, byte b7, byte b8, byte b9, byte ba, byte bb, byte bc, byte bd, byte be, byte bf, byte bg, byte bh, byte bi, byte bj)
 {
   digitalWrite(_cs, LOW);

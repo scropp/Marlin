@@ -1,0 +1,298 @@
+//-------------------- uM-FPU Register Definitions -----------------------------
+#define newPoint    16                  // uM-FPU register
+#define MasterTransform 20              // uM-FPU register
+#define Xdiff   81                      // uM-FPU register
+#define Ydiff   82                      // uM-FPU register
+#define ZdiffX  83                      // uM-FPU register
+#define ZdiffY  84                      // uM-FPU register
+#define Z1_value    12                  // uM-FPU register
+
+//-------------------- uM-FPU Function Definitions -----------------------------
+#define loadMatrix  0                   // uM-FPU user function
+#define transformPoint  1               // uM-FPU user function
+#define transformDestination    2       // uM-FPU user function
+#define transformInit   3               // uM-FPU user function
+
+    // 
+    // //********************************************
+    // //***** FPUTransform_init()
+    // 
+    // transformInit
+    Fpu.write(FCALL, transformInit);
+    // 
+float Z1;                               // float variable 
+float Y2;                               // float variable 
+float Z2;                               // float variable 
+float X3;                               // float variable 
+float Z3;                               // float variable 
+float XPoint;                           // float variable 
+float YPoint;                           // float variable 
+float ZPoint;                           // float variable 
+
+//-------------------- Generated Code ------------------------------------------
+    // #FUNC 0 loadMatrix
+    // #FUNC % transformPoint(float, float, float) //x,y,z
+    // #FUNC % transformDestination // input X=F1 Y=F2 Z=F3 out X'=F16 Y'=F17 Z'=18
+    // #FUNC % transformInit
+    // 
+    // //**********************************************
+    // //*** FPUTransform_determineBedOrientation() ***
+    // 
+    // X1 CON 15.0
+    // Y1 CON 15.0
+    // Z1 EQU FLOAT
+    // 
+    // Y2 EQU FLOAT
+    // Z2 EQU FLOAT
+    // 
+    // X3 EQU FLOAT
+    // Z3 EQU FLOAT
+    // 
+    // 
+    // newPoint EQU F16 //4x1 matrix 16 - 19
+    // 
+    // //function space F5 - F15
+    // 
+    // MasterTransform EQU F20 //4x4matrix 20 - 36
+    // 
+    // Xdiff EQU F81
+    // Ydiff EQU F82
+    // ZdiffX EQU F83
+    // ZdiffY EQU F84
+    // 
+    // Xdiff = X1 - X3
+    Fpu.write(SELECTA, Xdiff, FSETI, 15);
+    Fpu.write(FWRITE0);
+    Fpu.writeFloat(X3);
+    Fpu.write(FSUB0);
+    // Ydiff = Y1 - Y2
+    Fpu.write(SELECTA, Ydiff, FSETI, 15);
+    Fpu.write(FWRITE0);
+    Fpu.writeFloat(Y2);
+    Fpu.write(FSUB0);
+    // ZdiffX = Z1 - Z3
+    Fpu.write(SELECTA, ZdiffX);
+    Fpu.write(FWRITE0);
+    Fpu.writeFloat(Z1);
+    Fpu.write(FSET0, FWRITE0);
+    Fpu.writeFloat(Z3);
+    Fpu.write(FSUB0);
+    // ZdiffY = Z1 - Z2
+    Fpu.write(SELECTA, ZdiffY);
+    Fpu.write(FWRITE0);
+    Fpu.writeFloat(Z1);
+    Fpu.write(FSET0, FWRITE0);
+    Fpu.writeFloat(Z2);
+    Fpu.write(FSUB0);
+    // 
+    // Z1_value EQU F12
+    // Z1_value = Z1
+    Fpu.write(FWRITE, Z1_value);
+    Fpu.writeFloat(Z1);
+    // 
+    // loadMatrix
+    Fpu.write(FCALL, loadMatrix);
+    // //********************************************
+    // //***** FPUTransform_transformDestination()
+    // 
+    // //uses new point for return value
+    // //newPoint EQU F16 //4x1 matrix 16 - 19
+    // XPoint EQU FLOAT
+    // YPoint EQU FLOAT
+    // ZPoint EQU FLOAT
+    // 
+    // F85 = XPoint
+    Fpu.write(FWRITE, 85);
+    Fpu.writeFloat(XPoint);
+    // F86 = YPoint
+    Fpu.write(FWRITE, 86);
+    Fpu.writeFloat(YPoint);
+    // F87 = ZPoint
+    Fpu.write(FWRITE, 87);
+    Fpu.writeFloat(ZPoint);
+    // transformDestination
+    Fpu.write(FCALL, transformDestination);
+    // XPoint = F85
+    Fpu.write(SELECTA, 85);
+    Fpu.wait();
+    Fpu.write(FREADA);
+    XPoint = Fpu.readFloat();
+    // YPoint = F86
+    Fpu.write(SELECTA, 86);
+    Fpu.wait();
+    Fpu.write(FREADA);
+    YPoint = Fpu.readFloat();
+    // ZPoint = F87
+    Fpu.write(SELECTA, 87);
+    Fpu.wait();
+    Fpu.write(FREADA);
+    ZPoint = Fpu.readFloat();
+    // 
+    // 
+    // //********************************************
+    // //*** Function definitions
+    // 
+    // #FUNCTION transformInit
+    // // It is important to ensure that if the bed levelling routine has not been called the printer 
+    // // behaves as if the real world and idealised world are one and the same
+    // SELECTMA(MasterTransform, 4, 4)
+    // ;;	SELECTMA, 20, 4, 4
+    // MOP(IDENTITY)
+    // ;;	MOP, 17
+    // 
+    // #FUNCTION transformDestination
+    // transformPoint(F85, F86, F87)
+    // ;;	COPY, 85, 1
+    // ;;	COPY, 86, 2
+    // ;;	COPY, 87, 3
+    // ;;	FCALL, 1
+    // SELECTMA(newPoint, 4,1 )
+    // ;;	SELECTMA, 16, 4, 1
+    // MOP(SAVEAR, F85, F86, F87, F88)
+    // ;;	MOP, 38, 4, 85, 86, 87, 88
+    // 
+    // #FUNCTION transformPoint(float, float, float)
+    // oldPoint EQU F69 //1x4 matrix 12 - 15
+    // one EQU F11
+    // one = 1
+    // ;;	SELECTA, 11
+    // ;;	FSETI, $00000001
+    // SELECTMB(oldPoint, 1, 4)
+    // ;;	SELECTMB, 69, 1, 4
+    // MOP(LOADRB, arg1, arg2, arg3, one)
+    // ;;	MOP, 34, 4, 1, 2, 3, 11
+    // 
+    // SELECTMC(MasterTransform, 4, 4)
+    // ;;	SELECTMC, 20, 4, 4
+    // 
+    // SELECTMA(newPoint, 4,1 )
+    // ;;	SELECTMA, 16, 4, 1
+    // 
+    // MOP(MULTIPLY)
+    // ;;	MOP, 16
+    // 
+    // #FUNCTION loadMatrix
+    // 
+    // 
+    // Xtheta EQU F75
+    // Ytheta EQU F76
+    // cosxtheta EQU f77
+    // sinxtheta EQU f78
+    // cosytheta EQU f79
+    // sinytheta EQU f80
+    // one EQU F11
+    // one = 1.0
+    // ;;	SELECTA, 11
+    // ;;	FSETI, $00000001
+    // Transform1 EQU F37 //4x4matrix 37 - 52
+    // Transform2 EQU F53 //4x4matrix 53 - 68
+    // 
+    // 
+    // Xtheta = ZdiffX / Xdiff
+    // ;;	SELECTA, 75
+    // ;;	FSET, 83
+    // ;;	FDIV, 81
+    // Ytheta = ZdiffY / Ydiff
+    // ;;	SELECTA, 76
+    // ;;	FSET, 84
+    // ;;	FDIV, 82
+    // cosxtheta = cos(Xtheta)
+    // ;;	SELECTA, 77
+    // ;;	FSET, 75
+    // ;;	COS
+    // sinxtheta = sin(Xtheta)
+    // ;;	SELECTA, 78
+    // ;;	FSET, 75
+    // ;;	SIN
+    // cosytheta = cos(Ytheta)
+    // ;;	SELECTA, 79
+    // ;;	FSET, 76
+    // ;;	COS
+    // sinytheta = sin(Ytheta)
+    // ;;	SELECTA, 80
+    // ;;	FSET, 76
+    // ;;	SIN
+    // 
+    // //first rotate in Y using XZ 
+    // //[cos(t), 0, -sin(t), 0]
+    // //[0     , 1, 0      , 0]
+    // //[sin{t}, 0,  cos(t), 0]
+    // //[0     , 0, 0      , 1]
+    // 
+    // SELECTMB(Transform1, 4, 4)
+    // ;;	SELECTMB, 37, 4, 4
+    // MOP(LOADRB, cosxtheta, F0, -sinxtheta, F0, F0, one, F0, F0, sinxtheta, F0,  cosxtheta, F0, F0, F0, F0, one)
+    // ;;	MOP, 34, 16, 77, 0, -78, 0, 0, 11, 0, 0, 78, 0, 77, 0, 0, 0, 0, 11
+    // //first rotate in X using YZ 
+    // //[1,       0, 0     , 0]
+    // //[0,  cos(t), sin(t), 0]
+    // //[0, -sin{t}, cos(t), 0]
+    // //[0,       0, 0     , 1]
+    // 
+    // SELECTMC(Transform2, 4, 4)
+    // ;;	SELECTMC, 53, 4, 4
+    // MOP(LOADRC, one, F0, F0, F0, F0, cosxtheta, sinxtheta, F0, F0,-sinxtheta, cosxtheta, F0, F0, F0, F0, one)
+    // ;;	MOP, 35, 16, 11, 0, 0, 0, 0, 77, 78, 0, 0, -78, 77, 0, 0, 0, 0, 11
+    // SELECTMA(MasterTransform, 4, 4)
+    // ;;	SELECTMA, 20, 4, 4
+    // MOP(IDENTITY)
+    // ;;	MOP, 17
+    // MOP(MULTIPLY)
+    // ;;	MOP, 16
+    // 
+    // //now we have the object in a plane that is parallel to the x axes, but we do not have the z height correct.
+    // //transform the x15 y15 position using our rotation matrix and use the result to determine where z0 is and
+    // //add this translate function to the transform matrix.
+    // 
+    // SELECTMA(Transform2, 4, 4)
+    // ;;	SELECTMA, 53, 4, 4
+    // MOP(IDENTITY)
+    // ;;	MOP, 17
+    // transformPoint(X1, Y1, Z1_value)
+    // ;;	LOADBYTE, $0000000F
+    // ;;	COPY0, 1
+    // ;;	LOADBYTE, $0000000F
+    // ;;	COPY0, 2
+    // ;;	COPY, 12, 3
+    // ;;	FCALL, 1
+    // SELECTMA(newPoint, 4,1 )
+    // ;;	SELECTMA, 16, 4, 1
+    // MOP(SAVEAR, F1, F2, F3, -F0)
+    // ;;	MOP, 38, 4, 1, 2, 3, 128
+    // F65 = -F1     //f65 is reference into Transform2 for x translate value
+    // ;;	SELECTA, 65
+    // ;;	FSET, 1
+    // ;;	FNEG
+    // F66 = -F2     //f66 is reference into Transform2 for y translate value
+    // ;;	SELECTA, 66
+    // ;;	FSET, 2
+    // ;;	FNEG
+    // F67 = -F3     //f67 is reference into Transform2 for z translate value
+    // ;;	SELECTA, 67
+    // ;;	FSET, 3
+    // ;;	FNEG
+    // 
+    // SELECTMC(Transform2, 4, 4) //this is the new translate matrix
+    // ;;	SELECTMC, 53, 4, 4
+    // 
+    // SELECTMA(MasterTransform, 4, 4)  // copy this into Transform 1
+    // ;;	SELECTMA, 20, 4, 4
+    // SELECTMB(Transform1, 4, 4)
+    // ;;	SELECTMB, 37, 4, 4
+    // MOP(COPYAB)
+    // ;;	MOP, 25
+    // //now everything is in place
+    // MOP(MULTIPLY) // MA = MB . MC
+    // ;;	MOP, 16
+    // 
+    // // We now have a way to translate from real-world coordinates to idealised coortdinates, but what we actually want is 
+    // // a way to transform from the idealised g-code coordinates to real world coordinates. This is simply the inverse.
+    // MOP(COPYAB)
+    // ;;	MOP, 25
+    // //now everything is in place
+    // MOP(INVERSE) // MA = inverse(MB)
+    // ;;	MOP, 32
+    // 
+    // #END
+    // 
+
