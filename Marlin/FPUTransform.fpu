@@ -2,6 +2,7 @@
 #FUNC % transformPoint(float, float, float) //x,y,z
 #FUNC % transformDestination // input X=F1 Y=F2 Z=F3 out X'=F16 Y'=F17 Z'=18
 #FUNC % transformInit
+#FUNC % INVERSE_4x4 // for square 4x4  matricies MA = inv(MB)
 
 //**********************************************
 //*** FPUTransform_determineBedOrientation() ***
@@ -155,6 +156,196 @@ MOP(MULTIPLY) // MA = MB . MC
 // a way to transform from the idealised g-code coordinates to real world coordinates. This is simply the inverse.
 MOP(COPYAB)
 //now everything is in place
-MOP(INVERSE) // MA = inverse(MB)
+INVERSE_4x4 // MA = inverse(MB)
+SELECTMB(MasterTransform, 4, 4)  // copy this into Transform 1
+MOP(COPYBA)
 
+#FUNCTION INVERSE_4x4() // for square 4x4  matricies MA = inv(MB) using Gauss-Jordan elimination
+//TRACEON
+//BREAK
+CalculaionMatrix EQU F90  // 4x8 matrix
+workMatrix EQU F53 // temp 4x4 matrix or 8x1
+
+//DestMatrix EQU U86
+
+
+//DestMatrix  = READVAR(2)
+SELECTMA(workMatrix, 4, 4) 
+MOP(COPYBA) // copy the source data into a known location 
+   //(cannot do indirect referecing of registers as if htey were memory locations so need 
+   // to hardcode the registers)
+
+SELECTMA(CalculaionMatrix, 8, 4)
+MOP(SCALAR_SET, 0) // clear matrix
+
+//spread into working matrix
+SELECTMB(F90, 1, 8)
+SELECTMA(F53, 1, 4)
+MOP(COPYAB)
+F94 = 1.0
+
+SELECTMB(F98, 1, 8)
+SELECTMA(F57, 1, 4)
+MOP(COPYAB)
+F103 = 1.0
+
+SELECTMB(F106, 1, 8)
+SELECTMA(F61, 1, 4)
+MOP(COPYAB)
+F112 = 1.0
+
+SELECTMB(F114, 1, 8)
+SELECTMA(F65, 1, 4)
+MOP(COPYAB)
+F121 = 1.0
+
+//there are 16 steps, one for each cell. Cannot do htis as a loop because of hte limitations of the interpriter 
+//(have to rewrite in ASM some time)
+
+// ##1 - C1 
+// #1 - R90
+SELECTMA(F90, 1, 8)  // =R
+MOP(SCALAR_DIV, F90) // =R+C-1
+
+// #2 - R98
+SELECTMB(F90, 1, 8)  // =#1 R
+SELECTMA(F53, 1, 8) 
+MOP(COPYBA)
+MOP(SCALAR_MUL, F98) // = R+C-1 //multiply row 1 by the next primary element
+SELECTMA(F98, 1, 8)  // = R
+SELECTMB(F53, 1, 8)
+MOP(EWISE_SUB)
+
+// #3 - R106
+SELECTMB(F90, 1, 8)
+SELECTMA(F53, 1, 8)
+MOP(COPYBA)
+MOP(SCALAR_MUL, F106)  //multiply row 1 by the next primary element
+SELECTMA(F106, 1, 8)
+SELECTMB(F53, 1, 8)
+MOP(EWISE_SUB)
+
+// #4 - R114
+SELECTMB(F90, 1, 8)
+SELECTMA(F53, 1, 8)
+MOP(COPYBA)
+MOP(SCALAR_MUL, F114)  //multiply row 1 by the next primary element
+SELECTMA(F114, 1, 8)
+SELECTMB(F53, 1, 8)
+MOP(EWISE_SUB)
+
+// ##2 - C2 
+// #1 - R98
+SELECTMA(F98, 1, 8)
+MOP(SCALAR_DIV, F99) // R+C = primary element
+
+// #2 - R90
+SELECTMB(F98, 1, 8)
+SELECTMA(F53, 1, 8)
+MOP(COPYBA)
+MOP(SCALAR_MUL, F91)  //multiply row 1 by the next primary element
+SELECTMA(F90, 1, 8)
+SELECTMB(F53, 1, 8)
+MOP(EWISE_SUB)
+
+// #3 - R106
+SELECTMB(F98, 1, 8)
+SELECTMA(F53, 1, 8)
+MOP(COPYBA)
+MOP(SCALAR_MUL, F107)  //multiply row 1 by the next primary element
+SELECTMA(F106, 1, 8)
+SELECTMB(F53, 1, 8)
+MOP(EWISE_SUB)
+
+// #4 - R114
+SELECTMB(F98, 1, 8)
+SELECTMA(F53, 1, 8)
+MOP(COPYBA)
+MOP(SCALAR_MUL, F115)  //multiply row 1 by the next primary element
+SELECTMA(F114, 1, 8)
+SELECTMB(F53, 1, 8)
+MOP(EWISE_SUB)
+
+// ##3 - C3 
+// #1 - R106
+SELECTMA(F106, 1, 8)
+MOP(SCALAR_DIV, F108) // R+C-1 = primary element
+
+// #2 - R90
+SELECTMB(F106, 1, 8)
+SELECTMA(F53, 1, 8)
+MOP(COPYBA)
+MOP(SCALAR_MUL, F92)  //multiply row 1 by the next primary element
+SELECTMA(F90, 1, 8)
+SELECTMB(F53, 1, 8)
+MOP(EWISE_SUB)
+
+// #3 - R98
+SELECTMB(F106, 1, 8)
+SELECTMA(F53, 1, 8)
+MOP(COPYBA)
+MOP(SCALAR_MUL, F100)  //multiply row 1 by the next primary element
+SELECTMA(F98, 1, 8)
+SELECTMB(F53, 1, 8)
+MOP(EWISE_SUB)
+
+// #4 - R114
+SELECTMB(F106, 1, 8)
+SELECTMA(F53, 1, 8)
+MOP(COPYBA)
+MOP(SCALAR_MUL, F116)  //multiply row 1 by the next primary element
+SELECTMA(F114, 1, 8)
+SELECTMB(F53, 1, 8)
+MOP(EWISE_SUB)
+
+// ##3 - C3 
+// #1 - R114
+SELECTMA(F114, 1, 8)
+MOP(SCALAR_DIV, F117) // R+C-1 = primary element
+
+// #2 - R90
+SELECTMB(F114, 1, 8)
+SELECTMA(F53, 1, 8)
+MOP(COPYBA)
+MOP(SCALAR_MUL, F93)  //multiply row 1 by the next primary element
+SELECTMA(F90, 1, 8)
+SELECTMB(F53, 1, 8)
+MOP(EWISE_SUB)
+
+// #3 - R98
+SELECTMB(F114, 1, 8)
+SELECTMA(F53, 1, 8)
+MOP(COPYBA)
+MOP(SCALAR_MUL, F101)  //multiply row 1 by the next primary element
+SELECTMA(F98, 1, 8)
+SELECTMB(F53, 1, 8)
+MOP(EWISE_SUB)
+
+// #4 - R106
+SELECTMB(F114, 1, 8)
+SELECTMA(F53, 1, 8)
+MOP(COPYBA)
+MOP(SCALAR_MUL, F109)  //multiply row 1 by the next primary element
+SELECTMA(F106, 1, 8)
+SELECTMB(F53, 1, 8)
+MOP(EWISE_SUB)
+
+//Now extract the answer
+SELECTMB(F90, 1, 8)
+SELECTMA(F53, 1, 4)
+MOP(COPYBA)
+
+SELECTMB(F98, 1, 8)
+SELECTMA(F57, 1, 4)
+MOP(COPYBA)
+
+SELECTMB(F106, 1, 8)
+SELECTMA(F61, 1, 4)
+MOP(COPYBA)
+
+SELECTMB(F114, 1, 8)
+SELECTMA(F65, 1, 4)
+MOP(COPYBA)
+
+TRACEOFF
 #END
