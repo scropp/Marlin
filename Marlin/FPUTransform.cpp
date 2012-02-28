@@ -125,9 +125,9 @@ float ZPoint = destination[Z_AXIS];                           // float variable
     ZPoint = Fpu.readFloat();
 //-------------------- Generated Code (end)---------------------------------
     
-destination[X_AXIS] = XPoint;                           // float variable 
-destination[Y_AXIS] = YPoint;                           // float variable 
-destination[Z_AXIS] = ZPoint;                           // float variable 
+modified_destination[X_AXIS] = XPoint;                           // float variable 
+modified_destination[Y_AXIS] = YPoint;                           // float variable 
+modified_destination[Z_AXIS] = ZPoint;                           // float variable 
 }	
 
 #endif //UMFPUSUPPORT
