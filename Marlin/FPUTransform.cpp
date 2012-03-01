@@ -17,21 +17,47 @@
 
 #if defined(UMFPUSUPPORT) && (UMFPUSUPPORT > -1)
 
+bool FPUEnabled;
+
 void FPUTransform_init()
 {
-    Fpu.begin(UMFPUSUPPORT_CS_PIN);
-    if (Fpu.sync() == SYNC_CHAR)
-	  {
-      FpuSerial.printVersionln();
+if (FPUEnabled == true)
+  {
+  Fpu.begin(UMFPUSUPPORT_CS_PIN);
+  if (Fpu.sync() == SYNC_CHAR)
+    {
+    FpuSerial.printVersionln();
     Fpu.wait();
     // initialise FPU
-      Fpu.write(FCALL, transformInit);
-	  }
-    else
-      {
-      SERIAL_ECHO("uM-FPU not detected");
-      while(1) ; // stop if FPU not detected
-      }
+    Fpu.write(FCALL, transformInit);
+	}
+  else
+    {
+    SERIAL_ECHO("uM-FPU not detected");
+    SERIAL_ECHO("FPU Processing is not available");
+    FPUEnabled = false;
+    }
+  }
+else
+  {
+SERIAL_ECHO("FPU not enabled");
+  }
+}
+
+void FPUEnable()
+{
+	FPUEnabled = true;
+	FPUTransform_init();
+}
+
+void FPUReset()
+{
+	FPUTransform_init();
+}
+
+void FPUDisable()
+{
+	FPUEnabled = false;
 }
 
 void FPUTransform_determineBedOrientation()
@@ -46,7 +72,8 @@ float Z3;
 Z1 = Probe_Bed(15,15);
 Z2 = Probe_Bed(15,Y2);
 Z3 = Probe_Bed(X3,15);
-
+if(FPUEnabled)
+	{
 //-------------------- Generated Code ------------------------------------------
 
     // Xdiff = X1 - X3
@@ -81,7 +108,7 @@ Z3 = Probe_Bed(X3,15);
     // 
     // loadMatrix
     Fpu.write(FCALL, loadMatrix);
-
+	}
 }
 
 void FPUTransform_transformDestination()
@@ -93,7 +120,8 @@ void FPUTransform_transformDestination()
 float XPoint = destination[X_AXIS];                           // float variable 
 float YPoint = destination[Y_AXIS];                           // float variable 
 float ZPoint = destination[Z_AXIS];                           // float variable 
-    
+if(FPUEnabled)
+	{
 //-------------------- Generated Code---------------------------------
     Fpu.write(FWRITE, 85);
     Fpu.writeFloat(XPoint);
@@ -124,7 +152,7 @@ float ZPoint = destination[Z_AXIS];                           // float variable
     Fpu.write(FREADA);
     ZPoint = Fpu.readFloat();
 //-------------------- Generated Code (end)---------------------------------
-    
+	}    
 modified_destination[X_AXIS] = XPoint;                           // float variable 
 modified_destination[Y_AXIS] = YPoint;                           // float variable 
 modified_destination[Z_AXIS] = ZPoint;                           // float variable 
