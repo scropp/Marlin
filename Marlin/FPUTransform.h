@@ -10,7 +10,7 @@
 #if defined(UMFPUSUPPORT) && (UMFPUSUPPORT > -1) 
   void FPUTransform_init();
   void FPUTransform_determineBedOrientation();
-  void FPUTransform_transformDestination(); 
+  void FPUTransform_transformPoint(); 
 
 #else //no UMFPU SUPPORT
   FORCE_INLINE void FPUTransform_init() {};

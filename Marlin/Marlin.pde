@@ -1332,9 +1332,6 @@ void get_arc_coordinates()
 
 void prepare_move()
 {
-
-// transform destination *********************************************
-  FPUTransform_transformDestination();
   
   if (min_software_endstops) {
     if (destination[X_AXIS] < 0) destination[X_AXIS] = 0.0;
@@ -1347,6 +1344,7 @@ void prepare_move()
     if (destination[Y_AXIS] > Y_MAX_LENGTH) destination[Y_AXIS] = Y_MAX_LENGTH;
     if (destination[Z_AXIS] > Z_MAX_LENGTH) destination[Z_AXIS] = Z_MAX_LENGTH;
   }
+// TODO: transform destination *********************************************
 
   plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate*feedmultiply/60/100.0, active_extruder);
   for(int8_t i=0; i < NUM_AXIS; i++) {
@@ -1358,9 +1356,7 @@ void prepare_move()
 void prepare_arc_move(char isclockwise) {
   float r = hypot(offset[X_AXIS], offset[Y_AXIS]); // Compute arc radius for mc_arc
 
-// transform destination *********************************************
-  FPUTransform_transformDestination();
-  
+// TODO: transform destination *********************************************
   // Trace the arc
   mc_arc(current_position, destination, offset, X_AXIS, Y_AXIS, Z_AXIS, feedrate*feedmultiply/60/100.0, r, isclockwise, active_extruder);
   

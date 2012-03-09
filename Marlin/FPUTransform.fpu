@@ -1,10 +1,5 @@
 #FUNC 0 loadMatrix
 #FUNC % transformPoint(float, float, float) //x,y,z
-#FUNC % transformDestination // input X=F1 Y=F2 Z=F3 out X'=F16 Y'=F17 Z'=18
-#FUNC % transformInit
-
-//**********************************************
-//*** FPUTransform_determineBedOrientation() ***
 
 X1 CON 15.0
 Y1 CON 15.0
@@ -38,49 +33,13 @@ Z1_value = Z1
 
 loadMatrix
 
-//********************************************
-//***** FPUTransform_init()
-
-transformInit
-
-//********************************************
-//***** FPUTransform_transformDestination()
-
-//uses new point for return value
-//newPoint EQU F16 //4x1 matrix 16 - 19
-XPoint EQU FLOAT
-YPoint EQU FLOAT
-ZPoint EQU FLOAT
-
-F85 = XPoint
-F86 = YPoint
-F87 = ZPoint
-transformDestination
-XPoint = F85
-YPoint = F86
-ZPoint = F87
-
-
-//********************************************
-//*** Function definitions
-
-#FUNCTION transformInit
-// It is important to ensure that if the bed levelling routine has not been called the printer 
-// behaves as if the real world and idealised world are one and the same
-SELECTMA(MasterTransform, 4, 4)
-MOP(IDENTITY)
-
-#FUNCTION transformDestination
-transformPoint(F85, F86, F87)
-SELECTMA(newPoint, 4,1 )
-MOP(SAVEAR, F85, F86, F87, F88)
 
 #FUNCTION transformPoint(float, float, float)
 oldPoint EQU F69 //1x4 matrix 12 - 15
 one EQU F11
-one = 1
 SELECTMB(oldPoint, 1, 4)
 MOP(LOADRB, arg1, arg2, arg3, one)
+one = 1
 
 SELECTMC(MasterTransform, 4, 4)
 
@@ -98,7 +57,6 @@ sinxtheta EQU f78
 cosytheta EQU f79
 sinytheta EQU f80
 one EQU F11
-one = 1.0
 Transform1 EQU F37 //4x4matrix 37 - 52
 Transform2 EQU F53 //4x4matrix 53 - 68
 
@@ -109,6 +67,7 @@ cosxtheta = cos(Xtheta)
 sinxtheta = sin(Xtheta)
 cosytheta = cos(Ytheta)
 sinytheta = sin(Ytheta)
+one = 1
 
 //first rotate in Y using XZ 
 //[cos(t), 0, -sin(t), 0]
@@ -117,7 +76,8 @@ sinytheta = sin(Ytheta)
 //[0     , 0, 0      , 1]
 
 SELECTMB(Transform1, 4, 4)
-MOP(LOADRB, cosxtheta, F0, -sinxtheta, F0, F0, one, F0, F0, sinxtheta, F0,  cosxtheta, F0, F0, F0, F0, one)
+MOP(LOADRB, cosxtheta, F0, -sinxtheta, F0, F0, one, F0, F0, sinxtheta, F0, cosxtheta, F0, F0, F0, F0, one)
+
 //first rotate in X using YZ 
 //[1,       0, 0     , 0]
 //[0,  cos(t), sin(t), 0]
@@ -125,9 +85,8 @@ MOP(LOADRB, cosxtheta, F0, -sinxtheta, F0, F0, one, F0, F0, sinxtheta, F0,  cosx
 //[0,       0, 0     , 1]
 
 SELECTMC(Transform2, 4, 4)
-MOP(LOADRC, one, F0, F0, F0, F0, cosxtheta, sinxtheta, F0, F0,-sinxtheta, cosxtheta, F0, F0, F0, F0, one)
+MOP(LOADRC, one, F0, F0, F0,F0,cosxtheta, sinxtheta, F0, F0,-sinxtheta, cosxtheta, F0, F0, F0, F0, one)
 SELECTMA(MasterTransform, 4, 4)
-MOP(IDENTITY)
 MOP(MULTIPLY)
 
 //now we have the object in a plane that is parallel to the x axes, but we do not have the z height correct.
@@ -136,12 +95,11 @@ MOP(MULTIPLY)
 
 SELECTMA(Transform2, 4, 4)
 MOP(IDENTITY)
+
 transformPoint(X1, Y1, Z1_value)
 SELECTMA(newPoint, 4,1 )
-MOP(SAVEAR, F1, F2, F3, -F0)
-F65 = 15-F1     //f65 is reference into Transform2 for x translate value
-F66 = 15-F2     //f66 is reference into Transform2 for y translate value
-F67 = -F3     //f67 is reference into Transform2 for z translate value
+MOP(SAVEAR, -F0, -F0, F1, -F0)
+F67 = -F1     //f67 is reference into Transform2 for z translate value
 
 SELECTMC(Transform2, 4, 4) //this is the new translate matrix
 
@@ -149,12 +107,6 @@ SELECTMA(MasterTransform, 4, 4)  // copy this into Transform 1
 SELECTMB(Transform1, 4, 4)
 MOP(COPYAB)
 //now everything is in place
-MOP(MULTIPLY) // MA = MB . MC
-
-// We now have a way to translate from real-world coordinates to idealised coortdinates, but what we actually want is 
-// a way to transform from the idealised g-code coordinates to real world coordinates. This is simply the inverse.
-MOP(COPYAB)
-//now everything is in place
-MOP(INVERSE) // MA = inverse(MB)
+MOP(MULTIPLY)
 
 #END
