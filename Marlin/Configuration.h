@@ -357,7 +357,9 @@ const bool Z_ENDSTOPS_INVERTING = false; // set to true to invert the logic of t
 
 // Enable uM-FPU support:
 #define UMFPUSUPPORT 1
-
+#ifdef UMFPUSUPPORT
+  #define UMFPUSUPPORT_CS 30
+#endif
 
 // A debugging feature to compare calculated vs performed steps, to see if steps are lost by the software.
 //#define DEBUG_STEPS
