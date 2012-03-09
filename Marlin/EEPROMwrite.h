@@ -4,7 +4,6 @@
 #include "Marlin.h"
 #include "planner.h"
 #include "temperature.h"
-#include "FPUTransform.h"
 //#include <EEPROM.h>
 
 
@@ -39,7 +38,7 @@ template <class T> int EEPROM_readAnything(int &ee, T& value)
 // the default values are used whenever there is a change to the data, to prevent
 // wrong data being written to the variables.
 // ALSO:  always make sure the variables in the Store and retrieve sections are in the same order.
-#define EEPROM_VERSION "V05"  
+#define EEPROM_VERSION "V04"  
 
 inline void EEPROM_StoreSettings() 
 {
@@ -65,9 +64,6 @@ inline void EEPROM_StoreSettings()
     EEPROM_writeAnything(i,3000);
     EEPROM_writeAnything(i,0);
     EEPROM_writeAnything(i,0);
-  #endif
-  #if defined(UMFPUSUPPORT) && (UMFPUSUPPORT > -1) 
-  EEPROM_writeAnything(i,FPUEnabled);
   #endif
   char ver2[4]=EEPROM_VERSION;
   i=EEPROM_OFFSET;
@@ -130,10 +126,6 @@ inline void EEPROM_printSettings()
       SERIAL_ECHOPAIR(" D" ,Kd*PID_dT);
       SERIAL_ECHOLN(""); 
     #endif
-      #if defined(UMFPUSUPPORT) && (UMFPUSUPPORT > -1) 
-      SERIAL_ECHOPAIR(" FPU Enabled" , FPUEnabled?" yes":" no");
-      SERIAL_ECHOLN(""); 
-    #endif
   #endif
 } 
 
@@ -164,9 +156,7 @@ inline void EEPROM_RetrieveSettings(bool def=false)
       EEPROM_readAnything(i,Kp);
       EEPROM_readAnything(i,Ki);
       EEPROM_readAnything(i,Kd);
-	  #if defined(UMFPUSUPPORT) && (UMFPUSUPPORT > -1) 
-	  EEPROM_readAnything(i,FPUEnabled);
-	  #endif
+
       SERIAL_ECHO_START;
       SERIAL_ECHOLNPGM("Stored settings retreived:");
     }

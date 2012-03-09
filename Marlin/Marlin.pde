@@ -126,9 +126,6 @@
 // M501 - reads parameters from EEPROM (if you need reset them after you changed them temporarily).  
 // M502 - reverts to the default "factory settings".  You still need to store them in EEPROM afterwards if you want to.
 // M503 - print the current settings (from memory not from eeprom)
-// M510 - FPU Enable
-// M511 - FPU Reset
-// M512 - FPU Disable
 
 //Stepper Movement Variables
 
@@ -1256,21 +1253,6 @@ void process_commands()
       SERIAL_ECHO_START;
       SERIAL_ECHOPGM("Free Memory:");
       SERIAL_ECHO(freeMemory());
-    }
-    break;
-    case 510: // FPU Enable
-    {
-      FPUEnable();
-    }
-    break;
-    case 511: // FPU Reset
-    {
-      FPUReset();
-    }
-    break;
-    case 512: // FPU Disable
-    {
-      FPUDisable();
     }
     break;
     case 601: //Play tone

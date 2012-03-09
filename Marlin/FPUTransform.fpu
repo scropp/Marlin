@@ -60,8 +60,6 @@ transformDestination
 XPoint = F85
 YPoint = F86
 ZPoint = F87
-one EQU F11
-one = 1
 
 
 //********************************************
@@ -72,18 +70,16 @@ one = 1
 // behaves as if the real world and idealised world are one and the same
 SELECTMA(MasterTransform, 4, 4)
 MOP(IDENTITY)
-one EQU F11
-one = 1
 
-//----------------------------------------------
 #FUNCTION transformDestination
 transformPoint(F85, F86, F87)
 SELECTMA(newPoint, 4,1 )
 MOP(SAVEAR, F85, F86, F87, F88)
 
-//----------------------------------------------
 #FUNCTION transformPoint(float, float, float)
 oldPoint EQU F69 //1x4 matrix 12 - 15
+one EQU F11
+one = 1
 SELECTMB(oldPoint, 1, 4)
 MOP(LOADRB, arg1, arg2, arg3, one)
 
@@ -93,8 +89,9 @@ SELECTMA(newPoint, 4,1 )
 
 MOP(MULTIPLY)
 
-//----------------------------------------------
 #FUNCTION loadMatrix
+
+
 Xtheta EQU F75
 Ytheta EQU F76
 cosxtheta EQU f77
@@ -102,6 +99,7 @@ sinxtheta EQU f78
 cosytheta EQU f79
 sinytheta EQU f80
 one EQU F11
+one = 1.0
 Transform1 EQU F37 //4x4matrix 37 - 52
 Transform2 EQU F53 //4x4matrix 53 - 68
 
@@ -349,4 +347,5 @@ SELECTMB(F114, 1, 8)
 SELECTMA(F65, 1, 4)
 MOP(COPYBA)
 
+TRACEOFF
 #END
