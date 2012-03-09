@@ -177,7 +177,6 @@ extern float add_homeing[3];
 extern bool stop_heating_wait;
 
 extern float destination[NUM_AXIS];
-extern float modified_destination[NUM_AXIS];
 extern float offset[3];
 extern float feedrate, next_feedrate, saved_feedrate;
 

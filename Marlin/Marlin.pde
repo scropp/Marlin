@@ -154,9 +154,6 @@ float destination[NUM_AXIS] = {  0.0, 0.0, 0.0, 0.0};
 float offset[3] = {0.0, 0.0, 0.0};
 float feedrate = 1500.0, next_feedrate, saved_feedrate;
 
-// used by FPU transform code
-float modified_destination[NUM_AXIS] = {  0.0, 0.0, 0.0, 0.0};
-
 //===========================================================================
 //=============================private variables=============================
 //===========================================================================
@@ -1337,22 +1334,21 @@ void prepare_move()
 {
 
 // transform destination *********************************************
-
   FPUTransform_transformDestination();
   
   if (min_software_endstops) {
-    if (modified_destination[X_AXIS] < 0) modified_destination[X_AXIS] = 0.0;
-    if (modified_destination[Y_AXIS] < 0) modified_destination[Y_AXIS] = 0.0;
-    if (modified_destination[Z_AXIS] < 0) modified_destination[Z_AXIS] = 0.0;
+    if (destination[X_AXIS] < 0) destination[X_AXIS] = 0.0;
+    if (destination[Y_AXIS] < 0) destination[Y_AXIS] = 0.0;
+    if (destination[Z_AXIS] < 0) destination[Z_AXIS] = 0.0;
   }
 
   if (max_software_endstops) {
-    if (modified_destination[X_AXIS] > X_MAX_LENGTH) modified_destination[X_AXIS] = X_MAX_LENGTH;
-    if (modified_destination[Y_AXIS] > Y_MAX_LENGTH) modified_destination[Y_AXIS] = Y_MAX_LENGTH;
-    if (modified_destination[Z_AXIS] > Z_MAX_LENGTH) modified_destination[Z_AXIS] = Z_MAX_LENGTH;
+    if (destination[X_AXIS] > X_MAX_LENGTH) destination[X_AXIS] = X_MAX_LENGTH;
+    if (destination[Y_AXIS] > Y_MAX_LENGTH) destination[Y_AXIS] = Y_MAX_LENGTH;
+    if (destination[Z_AXIS] > Z_MAX_LENGTH) destination[Z_AXIS] = Z_MAX_LENGTH;
   }
 
-  plan_buffer_line(modified_destination[X_AXIS], modified_destination[Y_AXIS], modified_destination[Z_AXIS], destination[E_AXIS], feedrate*feedmultiply/60/100.0, active_extruder);
+  plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate*feedmultiply/60/100.0, active_extruder);
   for(int8_t i=0; i < NUM_AXIS; i++) {
     current_position[i] = destination[i];
   }
@@ -1366,7 +1362,7 @@ void prepare_arc_move(char isclockwise) {
   FPUTransform_transformDestination();
   
   // Trace the arc
-  mc_arc(current_position, modified_destination, offset, X_AXIS, Y_AXIS, Z_AXIS, feedrate*feedmultiply/60/100.0, r, isclockwise, active_extruder);
+  mc_arc(current_position, destination, offset, X_AXIS, Y_AXIS, Z_AXIS, feedrate*feedmultiply/60/100.0, r, isclockwise, active_extruder);
   
   // As far as the parser is concerned, the position is now == target. In reality the
   // motion control system might still be processing the action and the real tool position
