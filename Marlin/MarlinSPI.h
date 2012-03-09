@@ -11,8 +11,9 @@
 #ifndef _SPI_H_INCLUDED
 #define _SPI_H_INCLUDED
 
-#include <stdio.h>
 #include "Marlin.h"
+#include <stdio.h>
+#include <WProgram.h>
 #include <avr/pgmspace.h>
 
 #define SPI_CLOCK_DIV4 0x00

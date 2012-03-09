@@ -26,8 +26,8 @@
 */
 
 #include "marlin.h"
-#include "MarlinFpu.h"
 #include "MarlinSPI.h"
+#include "MarlinFpu.h"
 
 //---------- constructor ----------------------------------------------------
 

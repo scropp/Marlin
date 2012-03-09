@@ -27,8 +27,8 @@
 
 #include "Marlin.h"
 #include "print.h"
-#include "MarlinFpuSerial.h"
 #include "MarlinFpu.h"
+#include "MarlinFpuSerial.h"
 
 
 
