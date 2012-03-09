@@ -142,7 +142,7 @@ SELECTMA(newPoint, 4,1 )
 MOP(SAVEAR, F1, F2, F3, -F0)
 F65 = 15-F1     //f65 is reference into Transform2 for x translate value
 F66 = 15-F2     //f66 is reference into Transform2 for y translate value
-F67 = F3     //f67 is reference into Transform2 for z translate value
+F67 = -F3     //f67 is reference into Transform2 for z translate value
 
 SELECTMC(Transform2, 4, 4) //this is the new translate matrix
 
