@@ -31,11 +31,11 @@
 #include "Marlin.h"
 #include <Wire.h>
 
+
 #include "ultralcd.h"
 #include "led.h"
 #include "buzzer.h"
 #include "z_probe.h"
-#include "FPUTransform.h"
 #include "planner.h"
 #include "stepper.h"
 #include "temperature.h"
@@ -305,7 +305,6 @@ void setup()
   #endif
   buzzer_init(); //Initializes buzzer if BUZZER_PIN is defined
   probe_init(); //Initializes probe if PROBE_PIN is defined
-  FPUTransform_init(); //Initializes FPU when UMFPUSUPPORT defined
   setup_photpin();
   #ifdef ULTRA_LCD
     lcd_init();

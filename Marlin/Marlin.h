@@ -35,8 +35,6 @@
    #include "WProgram.h"
 #endif
 
-#include "MarlinSPI.h"
-
 #include "MarlinSerial.h"
 #include "SerialManager.h" 
 
