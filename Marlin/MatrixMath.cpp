@@ -6,7 +6,7 @@
  *  MatrixMath.cpp 
  */
 
-#include "WProgram.h"
+#include "Marlin.h"
 #include "MatrixMath.h"
 
 #define NR_END 1
@@ -20,14 +20,14 @@ MatrixMath::MatrixMath()
 void MatrixMath::MatrixPrint(float* A, int m, int n, String label){
 	// A = input matrix (m x n)
 	int i,j;
-	Serial.println();
-	Serial.println(label);
+	SERIAL_ECHOLN(' ');
+	SERIAL_ECHOLN(label);
 	for (i=0; i<m; i++){
 		for (j=0;j<n;j++){
-			Serial.print(A[n*i+j]);
-			Serial.print("\t");
+			SERIAL_ECHO(A[n*i+j]);
+			SERIAL_ECHO("\t");
 		}
-		Serial.println();
+		SERIAL_ECHOLN(' ');
 	}
 }
 
@@ -138,7 +138,7 @@ int MatrixMath::MatrixInvert(float* A, int n)
 		// check for singular matrix
 		if (A[pivrow*n+k] == 0.0f)
 		{
-			Serial.println("Inversion failed due to singular matrix");
+			SERIAL_ECHOLN("Inversion failed due to singular matrix");
 			return 0;
 		}
 		
@@ -201,7 +201,6 @@ void MatrixMath::MatrixIdentity(float* A, int m, int n)
 	for (i=0;i<m;i++)
 		for(j=0;j<n;j++)
 			A[n*i+j]=i==j?1:0;
-}
 }
 
 MatrixMath matrixMaths; //instance
