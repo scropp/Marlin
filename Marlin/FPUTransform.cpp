@@ -18,8 +18,10 @@ float MasterTransform[4][4]; // this is the transform that describes how to move
 //-------------------- uM-FPU Function Definitions -----------------------------
 // these are the private functions (todo: this aught to be c++ified)
 //#define loadMatrix  0                   // uM-FPU user function
+void loadMatrix(float X1, float Y1, float Z1, float Y2, float Z2, float X3, float Z3);
 //#define transformPoint  1               // uM-FPU user function
 //#define transformDestination    2       // uM-FPU user function
+void transformDestination(float &X, float &Y, float &Z);
 //#define transformInit   3               // uM-FPU user function
 
 bool FPUEnabled; // this is a bypass switch so that with one command the FPU can be
@@ -86,7 +88,7 @@ float Transform2[4][4] = {{ 1,         0,         0, 0},
 //MOP(IDENTITY)
 //MOP(MULTIPLY)
 float rotMatrix[4][4];
-matrixMaths.MatrixMult(Transform1, Transform2, 4, 4, 4, rotMatrix);
+matrixMaths.MatrixMult((float*)Transform1, (float*)Transform2, 4, 4, 4, (float*)rotMatrix);
 
 //now we have the object in a plane that is parallel to the x axes, but we do not have the z height correct.
 //transform the x15 y15 position using our rotation matrix and use the result to determine where z0 is and
@@ -95,9 +97,9 @@ matrixMaths.MatrixMult(Transform1, Transform2, 4, 4, 4, rotMatrix);
 //SELECTMA(Transform2, 4, 4)
 //MOP(IDENTITY)
 //transformPoint(X1, Y1, Z1_value)
-float zError[1][4]={{X1},{Y1},{Z1},{1}};
+float zError[1][4]={{X1,Y1,Z1,1}};
 float zErrNew[4][1];
-matrixMaths.MatrixMult(zError, rotMatrix, 1, 4, 4, zErrNew);
+matrixMaths.MatrixMult((float*)zError, (float*)rotMatrix, 1, 4, 4, (float*)zErrNew);
 
 //SELECTMA(newPoint, 4,1 )
 //MOP(SAVEAR, F1, F2, F3, -F0)
@@ -116,7 +118,7 @@ float zTranslate[4][4] = {{ 1, 0, 0, 0},
 //MOP(COPYAB)
 //now everything is in place
 //MOP(MULTIPLY) // MA = MB . MC
-matrixMaths.MatrixMult(rotMatrix, zTranslate, 4, 4, 4, MasterTransform);
+matrixMaths.MatrixMult((float*)rotMatrix, (float*)zTranslate, 4, 4, 4, (float*)MasterTransform);
 
 // We now have a way to translate from real-world coordinates to idealised coortdinates, //but what we actually want is 
 // a way to transform from the idealised g-code coordinates to real world coordinates. //This is simply the inverse.
@@ -125,15 +127,15 @@ matrixMaths.MatrixMult(rotMatrix, zTranslate, 4, 4, 4, MasterTransform);
 //INVERSE_4x4 // MA = inverse(MB)
 //SELECTMB(MasterTransform, 4, 4)  // copy this into Transform 1
 //MOP(COPYBA)
-matrixMaths.MatrixInvert(MasterTransform, 4);
+matrixMaths.MatrixInvert((float*)MasterTransform, 4);
 }
 
 //#FUNC % transformDestination // input X=F1 Y=F2 Z=F3 out X'=F16 Y'=F17 Z'=18
-void transformDestination(float *X, float *Y, float *Z)
+void transformDestination(float &X, float &Y, float &Z)
 {
 //oldPoint EQU F69 //1x4 matrix 12 - 15
-float oldPoint[1][4]={X, Y, Z, 1};
-float newPoint[4][1]={X, Y, Z, 1};
+float oldPoint[1][4]={{X, Y, Z, 1}};
+float newPoint[4][1]={{0},{0},{0},{0}};
 
 //SELECTMB(oldPoint, 1, 4)
 //MOP(LOADRB, F85, F86, F87, one)
@@ -143,7 +145,7 @@ float newPoint[4][1]={X, Y, Z, 1};
 //SELECTMA(newPoint, 4,1 )
 
 //MOP(MULTIPLY)
-matrixMaths.MatrixMult(oldPoint, MasterTransform, 1, 4, 4, newPoint);
+matrixMaths.MatrixMult((float*)oldPoint, (float*)MasterTransform, 1, 4, 4, (float*)newPoint);
 
 //SELECTMA(newPoint, 4,1 )
 //MOP(SAVEAR, F85, F86, F87, F88)
@@ -177,7 +179,7 @@ if (FPUEnabled == true)
 //    Fpu.write(FCALL, transformInit);
 // It is important to ensure that if the bed levelling routine has not been called the printer 
 // behaves as if the real world and idealised world are one and the same
-matrixMaths.MatrixIdentity(MasterTransform,4,4);
+matrixMaths.MatrixIdentity((float*)MasterTransform,4,4);
 //	}
 //  else
 //    {
@@ -226,7 +228,7 @@ if(FPUEnabled)
 
     // loadMatrix
 //    Fpu.write(FCALL, loadMatrix);
-void loadMatrix(15, 15, Z1, Y2, Z2, X3, Z3);
+loadMatrix(15, 15, Z1, Y2, Z2, X3, Z3);
 	}
 }
 
