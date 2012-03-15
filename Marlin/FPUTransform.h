@@ -2,9 +2,6 @@
 
 #define __FPUTRANSFORM
 #include "Marlin.h"
-#include "MarlinSPI.h"
-#include "MarlinFpu.h"
-#include "MarlinFpuSerial.h"
 #include "z_probe.h"
 
 #if defined(UMFPUSUPPORT) && (UMFPUSUPPORT > -1) 
