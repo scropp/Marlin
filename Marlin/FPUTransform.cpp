@@ -38,7 +38,7 @@ float Transform1[4][4] = {{cosxtheta, 0.0, -sinxtheta, 0.0},
 						  {		   0.0, 1.0,          0.0, 0.0}, 
 						  {sinxtheta, 0.0,  cosxtheta, 0.0}, 
 						  {        0.0, 0.0,          0.0, 1.0}};
-matrixMaths.MatrixPrint((float**)Transform1, 4, 4, "Transform1");
+matrixMaths.MatrixPrint((float*)Transform1, 4, 4, "Transform1");
 
 //first rotate in X using YZ 
 //[1,       0, 0     , 0]
