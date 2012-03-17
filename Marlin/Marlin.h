@@ -95,6 +95,13 @@ FORCE_INLINE void serialprintPGM(const char *str)
   }
 }
 
+// printing floats to 3DP
+FORCE_INLINE void serialPrintFloat( float f){
+  SERIAL_ECHO((int)f);
+  SERIAL_ECHOPGM(".");
+  int mantissa = (f - (int)f) * 1000;
+  SERIAL_ECHO( abs(mantissa) );
+}
 
 void get_command();
 void process_commands();
