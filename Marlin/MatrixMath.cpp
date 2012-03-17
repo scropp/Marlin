@@ -24,7 +24,7 @@ void MatrixMath::MatrixPrint(float* A, int m, int n, String label){
 	SERIAL_ECHOLN(label);
 	for (i=0; i<m; i++){
 		for (j=0;j<n;j++){
-			SERIAL_ECHO(A[n*i+j]);
+			serialPrintFloat(A[n*i+j]);
 			SERIAL_ECHO("\t");
 		}
 		SERIAL_ECHOLN(' ');
@@ -138,7 +138,7 @@ int MatrixMath::MatrixInvert(float* A, int n)
 		// check for singular matrix
 		if (A[pivrow*n+k] == 0.0f)
 		{
-			SERIAL_ECHOLN("Inversion failed due to singular matrix");
+			SERIAL_ECHOLNPGM("Inversion failed due to singular matrix");
 			return 0;
 		}
 		
