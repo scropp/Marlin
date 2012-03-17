@@ -17,16 +17,36 @@ bool FPUEnabled; // this is a bypass switch so that with one command the FPU can
 void loadMatrix(float X1, float Y1, float Z1, float Y2, float Z2, float X3, float Z3)
 {
 float Xdiff = X1 - X3;
+	serialPrintFloat(Xdiff);
+	SERIAL_ECHOLN("");
 float Ydiff = Y1 - Y2;
+	serialPrintFloat(Ydiff);
+	SERIAL_ECHOLN("");
 float ZdiffX = Z1 - Z3;
+	serialPrintFloat(ZdiffX);
+	SERIAL_ECHOLN("");
 float ZdiffY = Z1 - Z2;
+	serialPrintFloat(ZdiffY);
+	SERIAL_ECHOLN("");
 
-float Xtheta = ZdiffX / Xdiff;
-float Ytheta = ZdiffY / Ydiff;
+float Xtheta = atan(ZdiffX / Xdiff);
+	serialPrintFloat(Xtheta);
+	SERIAL_ECHOLN("");
+float Ytheta = atan(ZdiffY / Ydiff);
+	serialPrintFloat(Ytheta);
+	SERIAL_ECHOLN("");
 float cosxtheta = cos(Xtheta);
+	serialPrintFloat(cosxtheta);
+	SERIAL_ECHOLN("");
 float sinxtheta = sin(Xtheta);
+	serialPrintFloat(sinxtheta);
+	SERIAL_ECHOLN("");
 float cosytheta = cos(Ytheta);
+	serialPrintFloat(cosytheta);
+	SERIAL_ECHOLN("");
 float sinytheta = sin(Ytheta);
+	serialPrintFloat(sinytheta);
+	SERIAL_ECHOLN("");
 
 //first rotate in Y using XZ 
 //[cos(t), 0, -sin(t), 0]
@@ -59,7 +79,7 @@ matrixMaths.MatrixPrint((float*)rotMatrix, 4, 4, "rotMatrix");
 //transform the x15 y15 position using our rotation matrix and use the result to determine where z0 is and
 //add this translate function to the transform matrix.
 
-float zError[1][4]={{X1,Y1,Z1,1}};
+float zError[1][4]={{X1,Y1,Z1,1.0}};
 float zErrNew[4][1];
 matrixMaths.MatrixMult((float*)zError, (float*)rotMatrix, 1, 4, 4, (float*)zErrNew);
 
@@ -78,7 +98,7 @@ matrixMaths.MatrixPrint((float*)MasterTransform, 4, 4, "MasterTransform");
 
 void transformDestination(float &X, float &Y, float &Z)
 {
-float oldPoint[1][4]={{X, Y, Z, 1}};
+float oldPoint[1][4]={{X, Y, Z, 1.0}};
 float newPoint[4][1]={{0},{0},{0},{0}};
 matrixMaths.MatrixMult((float*)oldPoint, (float*)MasterTransform, 1, 4, 4, (float*)newPoint);
 X=newPoint[0][0];
