@@ -31,22 +31,24 @@ float ZdiffY = Z1 - Z2;
 	serialPrintFloat(ZdiffY);
 	SERIAL_ECHOLN("");
 
-float Xtheta = atan(ZdiffX / Xdiff);
+
+//modified to take advantage of small angle trig.
+float Xtheta = ZdiffX / Xdiff;
 //	serialPrintFloat(Xtheta);
 //	SERIAL_ECHOLN("");
-float Ytheta = atan(ZdiffY / Ydiff);
+float Ytheta = ZdiffY / Ydiff;
 //	serialPrintFloat(Ytheta);
 //	SERIAL_ECHOLN("");
-float cosxtheta = cos(Xtheta);
+float cosxtheta = 1-(Xtheta*Xtheta)/2;
 //	serialPrintFloat(cosxtheta);
 //	SERIAL_ECHOLN("");
-float sinxtheta = sin(Xtheta);
+float sinxtheta = Xtheta;
 //	serialPrintFloat(sinxtheta);
 //	SERIAL_ECHOLN("");
-float cosytheta = cos(Ytheta);
+float cosytheta = 1-(Ytheta*Ytheta)/2;
 //	serialPrintFloat(cosytheta);
 //	SERIAL_ECHOLN("");
-float sinytheta = sin(Ytheta);
+float sinytheta = Ytheta;
 //	serialPrintFloat(sinytheta);
 //	SERIAL_ECHOLN("");
 
