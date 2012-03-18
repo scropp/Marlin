@@ -16,37 +16,55 @@ bool FPUEnabled; // this is a bypass switch so that with one command the FPU can
 
 void loadMatrix(float X1, float Y1, float Z1, float Y2, float Z2, float X3, float Z3)
 {
-float Xdiff = X1 - X3;
+float Xdiff = X3 - X1;
 	serialPrintFloat(Xdiff);
 	SERIAL_ECHOLN("");
-float Ydiff = Y1 - Y2;
+float Ydiff = Y2 - Y1;
 	serialPrintFloat(Ydiff);
 	SERIAL_ECHOLN("");
-float ZdiffX = Z1 - Z3;
+//clockwise
+float ZdiffX = Z3 - Z1;
 	serialPrintFloat(ZdiffX);
 	SERIAL_ECHOLN("");
+//anti clockwise
 float ZdiffY = Z1 - Z2;
 	serialPrintFloat(ZdiffY);
 	SERIAL_ECHOLN("");
 
 float Xtheta = atan(ZdiffX / Xdiff);
-	serialPrintFloat(Xtheta);
-	SERIAL_ECHOLN("");
+//	serialPrintFloat(Xtheta);
+//	SERIAL_ECHOLN("");
 float Ytheta = atan(ZdiffY / Ydiff);
-	serialPrintFloat(Ytheta);
-	SERIAL_ECHOLN("");
+//	serialPrintFloat(Ytheta);
+//	SERIAL_ECHOLN("");
 float cosxtheta = cos(Xtheta);
-	serialPrintFloat(cosxtheta);
-	SERIAL_ECHOLN("");
+//	serialPrintFloat(cosxtheta);
+//	SERIAL_ECHOLN("");
 float sinxtheta = sin(Xtheta);
-	serialPrintFloat(sinxtheta);
-	SERIAL_ECHOLN("");
+//	serialPrintFloat(sinxtheta);
+//	SERIAL_ECHOLN("");
 float cosytheta = cos(Ytheta);
-	serialPrintFloat(cosytheta);
-	SERIAL_ECHOLN("");
+//	serialPrintFloat(cosytheta);
+//	SERIAL_ECHOLN("");
 float sinytheta = sin(Ytheta);
-	serialPrintFloat(sinytheta);
-	SERIAL_ECHOLN("");
+//	serialPrintFloat(sinytheta);
+//	SERIAL_ECHOLN("");
+
+
+// Start by moving X and Y to 0 (seperating this out as we want to undo this later)
+float Translate00Z[4][4] = {{1.0, 0.0, 0.0, -X1},
+						    {0.0, 1.0, 0.0, -Y1}, 
+						    {0.0, 0.0, 1.0, 0.0}, 
+						    {0.0, 0.0, 0.0, 1.0}};
+
+//now move Z to 0
+float TranslateZ0[4][4] = {{1.0, 0.0, 0.0, 0.0},
+						   {0.0, 1.0, 0.0, 0.0}, 
+						   {0.0, 0.0, 1.0, -Z1}, 
+						   {0.0, 0.0, 0.0, 1.0}};
+
+float Transform0[4][4];
+matrixMaths.MatrixMult((float*)Translate00Z, (float*)TranslateZ0, 4, 4, 4, (float*)Transform0);
 
 //first rotate in Y using XZ 
 //[cos(t), 0, -sin(t), 0]
@@ -54,11 +72,13 @@ float sinytheta = sin(Ytheta);
 //[sin{t}, 0,  cos(t), 0]
 //[0     , 0, 0      , 1]
 
-float Transform1[4][4] = {{cosxtheta, 0.0, -sinxtheta, 0.0},
-						  {		   0.0, 1.0,          0.0, 0.0}, 
-						  {sinxtheta, 0.0,  cosxtheta, 0.0}, 
-						  {        0.0, 0.0,          0.0, 1.0}};
-matrixMaths.MatrixPrint((float*)Transform1, 4, 4, "Transform1");
+float Transform1[4][4] = {{cosxtheta, 0.0, sinxtheta, 0.0},
+						  {      0.0, 1.0,        0.0, 0.0}, 
+						  {-sinxtheta, 0.0,  cosxtheta, 0.0}, 
+						  {      0.0, 0.0,        0.0, 1.0}};
+//matrixMaths.MatrixPrint((float*)Transform1, 4, 4, "Transform1");
+float rotMatrix1[4][4];
+matrixMaths.MatrixMult((float*)Transform1, (float*)Transform0, 4, 4, 4, (float*)rotMatrix1);
 
 //first rotate in X using YZ 
 //[1,       0, 0     , 0]
@@ -68,26 +88,33 @@ matrixMaths.MatrixPrint((float*)Transform1, 4, 4, "Transform1");
 
 float Transform2[4][4] = {{ 1.0,         0.0,         0.0, 0.0},
 						  { 0.0, cosytheta, sinytheta, 0.0}, 
-						  { 0.0,-sinytheta, cosytheta, 0.0}, 
+						  { 0.0,sinytheta, cosytheta, 0.0}, 
 						  { 0.0,         0.0,         0.0, 1.0}};
-matrixMaths.MatrixPrint((float*)Transform2, 4, 4, "Transform2");
-float rotMatrix[4][4];
-matrixMaths.MatrixMult((float*)Transform1, (float*)Transform2, 4, 4, 4, (float*)rotMatrix);
-matrixMaths.MatrixPrint((float*)rotMatrix, 4, 4, "rotMatrix");
+//matrixMaths.MatrixPrint((float*)Transform2, 4, 4, "Transform2");
+//float rotMatrix[4][4];
+//matrixMaths.MatrixMult((float*)Transform1, (float*)Transform2, 4, 4, 4, (float*)rotMatrix);
+float rotMatrix2[4][4];
+matrixMaths.MatrixMult((float*)Transform2, (float*)rotMatrix1, 4, 4, 4, (float*)rotMatrix2);
+//translate back to XY
+//matrixMaths.MatrixInvert((float*)Translate00Z, 4);
+Translate00Z[0][3] = X1;
+Translate00Z[1][3] = Y1;
+matrixMaths.MatrixMult((float*)rotMatrix2, (float*)Translate00Z, 4, 4, 4, (float*)MasterTransform);
+//matrixMaths.MatrixPrint((float*)rotMatrix, 4, 4, "rotMatrix");
 
 //now we have the object in a plane that is parallel to the x axes, but we do not have the z height correct.
 //transform the x15 y15 position using our rotation matrix and use the result to determine where z0 is and
 //add this translate function to the transform matrix.
 
-float zError[1][4]={{X1,Y1,Z1,1.0}};
-float zErrNew[4][1];
-matrixMaths.MatrixMult((float*)zError, (float*)rotMatrix, 1, 4, 4, (float*)zErrNew);
+//float zError[4][1]={{X1},{Y1},{Z1},{1.0}};
+//float zErrNew[1][4];
+//matrixMaths.MatrixMult((float*)rotMatrix, (float*)zError, 1, 4, 4, (float*)zErrNew);
 
-float zTranslate[4][4] = {{ 1.0, 0.0, 0.0, 0.0},
-						  { 0.0, 1.0, 0.0, 0.0}, 
-						  { 0.0, 0.0, 1.0, 0.0}, 
-						  { 15-zErrNew[0][0],15-zErrNew[1][0],-zErrNew[2][0], 1.0}};
-matrixMaths.MatrixMult((float*)rotMatrix, (float*)zTranslate, 4, 4, 4, (float*)MasterTransform);
+//float zTranslate[4][4] = {{ 1.0, 0.0, 0.0, 0.0},
+//						  { 0.0, 1.0, 0.0, 0.0}, 
+//						  { 0.0, 0.0, 1.0, 0.0}, 
+//						  { 15-zErrNew[0][0],15-zErrNew[1][0],-zErrNew[2][0], 1.0}};
+//matrixMaths.MatrixMult((float*)rotMatrix, (float*)zTranslate, 4, 4, 4, (float*)MasterTransform);
 
 // We now have a way to translate from real-world coordinates to idealised coortdinates, // but what we actually want is a way to transform from the idealised g-code coordinates
 // to real world coordinates. 
@@ -98,12 +125,12 @@ matrixMaths.MatrixPrint((float*)MasterTransform, 4, 4, "MasterTransform");
 
 void transformDestination(float &X, float &Y, float &Z)
 {
-float oldPoint[1][4]={{X, Y, Z, 1.0}};
-float newPoint[4][1]={{0},{0},{0},{0}};
-matrixMaths.MatrixMult((float*)oldPoint, (float*)MasterTransform, 1, 4, 4, (float*)newPoint);
+float oldPoint[4][1]={{X}, {Y}, {Z}, {1.0}};
+float newPoint[1][4]={{0.0,0.0,0.0,0.0}};
+matrixMaths.MatrixMult((float*)MasterTransform, (float*)oldPoint, 4, 4, 1, (float*)newPoint);
 X=newPoint[0][0];
-Y=newPoint[1][0];
-Z=newPoint[2][0];
+Y=newPoint[0][1];
+Z=newPoint[0][2];
 }
 
 void FPUTransform_init()
@@ -113,11 +140,11 @@ if (FPUEnabled == true)
   // It is important to ensure that if the bed levelling routine has not been called the 
   // printer behaves as if the real world and idealised world are one and the same
   matrixMaths.MatrixIdentity((float*)MasterTransform,4,4);
-  SERIAL_ECHO("transorm correction configured");
+  SERIAL_ECHO("transform configured to identity");
   }
 else
   {
-  SERIAL_ECHO("transorm correction not enabled");
+  SERIAL_ECHO("transform correction not enabled");
   }
 }
 
