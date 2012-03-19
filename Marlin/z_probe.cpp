@@ -71,7 +71,7 @@ float Probe_Bed(float x_pos, float y_pos)
             {
                 if (abs(ProbeDepth[i] - ProbeDepth[i - 1]) > .02) 
                 {     //keep going until readings match to avoid sticky bed
-                    SERIAL_ECHO("Probing again - difference:"); SERIAL_ECHO(abs(ProbeDepth[i] - ProbeDepth[i - 1])); SERIAL_ECHO(", Z="); SERIAL_ECHOLN(ProbeDepth[i]); 
+                    SERIAL_ECHO("Probing again - difference:"); serialPrintFloat(abs(ProbeDepth[i] - ProbeDepth[i - 1])); SERIAL_ECHO(", Z1="); serialPrintFloatLn(ProbeDepth[i - 1]); SERIAL_ECHO(", Z2="); serialPrintFloatLn(ProbeDepth[i]); 
                     i -= 2;    //Throw out both that don't match because we don't know which one is accurate
                 }
             }  
@@ -80,7 +80,7 @@ float Probe_Bed(float x_pos, float y_pos)
         feedrate = saved_feedrate;        
     }
     ProbeDepthAvg = (ProbeDepth[0] + ProbeDepth[1]) / 2;
-    SERIAL_ECHO("Z="); SERIAL_ECHOLN(ProbeDepthAvg); 
+    SERIAL_ECHO("Z="); serialPrintFloatLn(ProbeDepthAvg);
     return ProbeDepthAvg;
  }
 //Crash1 END Add Probe Bed Function
@@ -111,10 +111,10 @@ void probe_3points()
     feedrate = homing_feedrate[Z_AXIS];
     prepare_move();
     SERIAL_ECHOLN("**************************************");       
-    SERIAL_ECHO("Point1 ="); SERIAL_ECHOLN(Point1);
-    SERIAL_ECHO("Point2 ="); SERIAL_ECHOLN(Point2);
-    SERIAL_ECHO("Point3 ="); SERIAL_ECHOLN(Point3);
-    SERIAL_ECHO("Probed Average="); SERIAL_ECHOLN(Probe_Avg);
+    SERIAL_ECHO("Point1 ="); serialPrintFloatLn(Point1);
+    SERIAL_ECHO("Point2 ="); serialPrintFloatLn(Point2);
+    SERIAL_ECHO("Point3 ="); serialPrintFloatLn(Point3);
+    SERIAL_ECHO("Probed Average="); serialPrintFloatLn(Probe_Avg);
     SERIAL_ECHOLN("**************************************");       
 }
 
