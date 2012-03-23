@@ -14,16 +14,16 @@ void transformDestination(float &X, float &Y, float &Z);
 bool FPUEnabled; // this is a bypass switch so that with one command the FPU can be
 				 // turned off
 
-void loadMatrix(float X1, float Y1, float Z1, float Y2, float Z2, float X3, float Z3)
+void loadMatrix(float X1, float Y1, float Z1, float X2, float Y2, float Z2, float X3, float Y3, float Z3 ,float X4, float Y4, float Z4)
 {
-float Xdiff = X3 - X1;
+float Xdiff = X4 - X3;
 	serialPrintFloat(Xdiff);
 	SERIAL_ECHOLN("");
 float Ydiff = Y2 - Y1;
 	serialPrintFloat(Ydiff);
 	SERIAL_ECHOLN("");
 //clockwise
-float ZdiffX = Z3 - Z1;
+float ZdiffX = Z4 - Z3;
 	serialPrintFloat(ZdiffX);
 	SERIAL_ECHOLN("");
 //anti clockwise
@@ -171,16 +171,20 @@ void FPUTransform_determineBedOrientation()
 float Z1;  
 float Y2 = Y_MAX_LENGTH - 15;  
 float Z2; 
-float X3 = X_MAX_LENGTH - 15; 
+float Y3 = X_MAX_LENGTH / 2; 
 float Z3;
+float X4 = X_MAX_LENGTH - 15; 
+float Y4 = Y3; 
+float Z4;
 
 //get Z for X15 Y15, X15 Y(Y_MAX_LENGTH - 15) and X(X_MAX_LENGTH - 15) Y15
 Z1 = Probe_Bed(15,15);
 Z2 = Probe_Bed(15,Y2);
-Z3 = Probe_Bed(X3,15);
+Z3 = Probe_Bed(15, Y3);
+Z4 = Probe_Bed(X4,Y4);
 if(FPUEnabled)
 	{
-	loadMatrix(15, 15, Z1, Y2, Z2, X3, Z3);
+	loadMatrix(15, 15, Z1, 15, Y2, Z2, 15, Y3, Z3, X4, Y4, Z4);
 	}
 }
 
