@@ -168,23 +168,28 @@ void FPUDisable()
 
 void FPUTransform_determineBedOrientation()
 {
+float Y1 = 55;
 float Z1;  
-float Y2 = Y_MAX_LENGTH - 15;  
+float Y2 = 105;  
 float Z2; 
-float Y3 = X_MAX_LENGTH / 2; 
+float Y3 = Y_MAX_LENGTH / 2; 
 float Z3;
 float X4 = X_MAX_LENGTH - 15; 
 float Y4 = Y3; 
 float Z4;
 
 //get Z for X15 Y15, X15 Y(Y_MAX_LENGTH - 15) and X(X_MAX_LENGTH - 15) Y15
-Z1 = Probe_Bed(15,15);
+Z1 = Probe_Bed(15,Y1);
 Z2 = Probe_Bed(15,Y2);
-Z3 = Probe_Bed(15, Y3);
+//interpolate height Z3 because the sprung bed cannot measure this.
+Z3 = abs(Y1-Y2)/2 + min(Y1,Y2);
 Z4 = Probe_Bed(X4,Y4);
+
+
+
 if(FPUEnabled)
 	{
-	loadMatrix(15, 15, Z1, 15, Y2, Z2, 15, Y3, Z3, X4, Y4, Z4);
+	loadMatrix(15, Y1, Z1, 15, Y2, Z2, 15, Y3, Z3, X4, Y4, Z4);
 	}
 }
 
