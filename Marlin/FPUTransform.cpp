@@ -52,73 +52,57 @@ float sinytheta = Ytheta;
 //	serialPrintFloat(sinytheta);
 //	SERIAL_ECHOLN("");
 
-
-// Start by moving X and Y to 0 (seperating this out as we want to undo this later)
-float Translate00Z[4][4] = {{1.0, 0.0, 0.0, -X1},
-						    {0.0, 1.0, 0.0, -Y1}, 
-						    {0.0, 0.0, 1.0, 0.0}, 
+//these transforms are to set the origin for each rotation
+float TranslateX0[4][4] = {{1.0, 0.0, 0.0, -X3},
+						    {0.0, 1.0, 0.0, -Y3}, 
+						    {0.0, 0.0, 1.0, -Z3}, 
 						    {0.0, 0.0, 0.0, 1.0}};
 
-//now move Z to 0
-float TranslateZ0[4][4] = {{1.0, 0.0, 0.0, 0.0},
-						   {0.0, 1.0, 0.0, 0.0}, 
+float TranslateY0[4][4] = {{1.0, 0.0, 0.0, -X1},
+						   {0.0, 1.0, 0.0, -Y1}, 
 						   {0.0, 0.0, 1.0, -Z1}, 
 						   {0.0, 0.0, 0.0, 1.0}};
 
-float Transform0[4][4];
-matrixMaths.MatrixMult((float*)Translate00Z, (float*)TranslateZ0, 4, 4, 4, (float*)Transform0);
-
-//first rotate in Y using XZ 
-//[cos(t), 0, -sin(t), 0]
-//[0     , 1, 0      , 0]
-//[sin{t}, 0,  cos(t), 0]
-//[0     , 0, 0      , 1]
-
-float Transform1[4][4] = {{cosxtheta, 0.0, sinxtheta, 0.0},
+//rotate in Y using XZ 
+float TransformY[4][4] = {{cosxtheta, 0.0, sinxtheta, 0.0},
 						  {      0.0, 1.0,        0.0, 0.0}, 
 						  {-sinxtheta, 0.0,  cosxtheta, 0.0}, 
 						  {      0.0, 0.0,        0.0, 1.0}};
-//matrixMaths.MatrixPrint((float*)Transform1, 4, 4, "Transform1");
-float rotMatrix1[4][4];
-matrixMaths.MatrixMult((float*)Transform1, (float*)Transform0, 4, 4, 4, (float*)rotMatrix1);
-
-//first rotate in X using YZ 
-//[1,       0, 0     , 0]
-//[0,  cos(t), sin(t), 0]
-//[0, -sin{t}, cos(t), 0]
-//[0,       0, 0     , 1]
-
-float Transform2[4][4] = {{ 1.0,         0.0,         0.0, 0.0},
+//rotate in X using YZ 
+float TransformX[4][4] = {{ 1.0,         0.0,         0.0, 0.0},
 						  { 0.0, cosytheta, sinytheta, 0.0}, 
 						  { 0.0,sinytheta, cosytheta, 0.0}, 
 						  { 0.0,         0.0,         0.0, 1.0}};
-//matrixMaths.MatrixPrint((float*)Transform2, 4, 4, "Transform2");
-//float rotMatrix[4][4];
-//matrixMaths.MatrixMult((float*)Transform1, (float*)Transform2, 4, 4, 4, (float*)rotMatrix);
-float rotMatrix2[4][4];
-matrixMaths.MatrixMult((float*)Transform2, (float*)rotMatrix1, 4, 4, 4, (float*)rotMatrix2);
-//translate back to XY
-//matrixMaths.MatrixInvert((float*)Translate00Z, 4);
-Translate00Z[0][3] = X1;
-Translate00Z[1][3] = Y1;
-matrixMaths.MatrixMult((float*)rotMatrix2, (float*)Translate00Z, 4, 4, 4, (float*)MasterTransform);
-//matrixMaths.MatrixPrint((float*)rotMatrix, 4, 4, "rotMatrix");
 
-//now we have the object in a plane that is parallel to the x axes, but we do not have the z height correct.
-//transform the x15 y15 position using our rotation matrix and use the result to determine where z0 is and
-//add this translate function to the transform matrix.
 
-//float zError[4][1]={{X1},{Y1},{Z1},{1.0}};
-//float zErrNew[1][4];
-//matrixMaths.MatrixMult((float*)rotMatrix, (float*)zError, 1, 4, 4, (float*)zErrNew);
+// first translate point1 to 0 then rotate in Y then translate back
+float MatrixStage1[4][4];
+float MatrixStage2[4][4];
+//matrixMaths.MatrixMult((float*)TranslateY0, (float*)TransformX, 4, 4, 4, (float*)MatrixStage1);
+//matrixMaths.MatrixPrint((float*)MatrixStage1, 4, 4, "MatrixStage1");
+//TranslateY0[0][3] = -TranslateY0[0][3];
+//TranslateY0[1][3] = -TranslateY0[1][3];
+//TranslateY0[2][3] = -TranslateY0[2][3];
+//matrixMaths.MatrixPrint((float*)TranslateY0, 4, 4, "TranslateY0");
+//matrixMaths.MatrixMult((float*)MatrixStage1, (float*)TranslateY0, 4, 4, 4, (float*)MatrixStage2);
+//matrixMaths.MatrixPrint((float*)MatrixStage2, 4, 4, "MatrixStage2");
+//Now translate point3 to 0 and rotate in x before translating back
+float MatrixStage3[4][4];
+float MatrixStage4[4][4];
+//matrixMaths.MatrixMult((float*)MatrixStage2, (float*)TranslateX0, 4, 4, 4, (float*)MatrixStage3);
+//matrixMaths.MatrixPrint((float*)MatrixStage3, 4, 4, "MatrixStage3");
+//matrixMaths.MatrixMult((float*)MatrixStage3, (float*)TransformY, 4, 4, 4, (float*)MatrixStage4);
+matrixMaths.MatrixMult((float*)TransformX, (float*)TransformY, 4, 4, 4, (float*)MasterTransform);
+matrixMaths.MatrixPrint((float*)MatrixStage4, 4, 4, "MatrixStage4");
+//TranslateX0[0][3] = -TranslateX0[0][3];
+//TranslateX0[1][3] = -TranslateX0[1][3];
+//TranslateX0[2][3] = -TranslateX0[2][3];
+//matrixMaths.MatrixPrint((float*)TranslateX0, 4, 4, "TranslateX0");
+//matrixMaths.MatrixMult((float*)MatrixStage4, (float*)TranslateX0, 4, 4, 4, (float*)MasterTransform);
+//matrixMaths.MatrixPrint((float*)MasterTransform, 4, 4, "MasterTransform (pre-invert)");
 
-//float zTranslate[4][4] = {{ 1.0, 0.0, 0.0, 0.0},
-//						  { 0.0, 1.0, 0.0, 0.0}, 
-//						  { 0.0, 0.0, 1.0, 0.0}, 
-//						  { 15-zErrNew[0][0],15-zErrNew[1][0],-zErrNew[2][0], 1.0}};
-//matrixMaths.MatrixMult((float*)rotMatrix, (float*)zTranslate, 4, 4, 4, (float*)MasterTransform);
-
-// We now have a way to translate from real-world coordinates to idealised coortdinates, // but what we actually want is a way to transform from the idealised g-code coordinates
+// We now have a way to translate from real-world coordinates to idealised coortdinates, 
+// but what we actually want is a way to transform from the idealised g-code coordinates
 // to real world coordinates. 
 // This is simply the inverse.
 matrixMaths.MatrixInvert((float*)MasterTransform, 4);
@@ -182,7 +166,9 @@ float Z4;
 Z1 = Probe_Bed(15,Y1);
 Z2 = Probe_Bed(15,Y2);
 //interpolate height Z3 because the sprung bed cannot measure this.
-Z3 = abs(Y1-Y2)/2 + min(Y1,Y2);
+Z3 = abs(Z1-Z2)/2 + min(Z1,Z2);
+SERIAL_ECHO("Calculated Z3 = ");
+SERIAL_ECHOLN(Z3);
 Z4 = Probe_Bed(X4,Y4);
 
 
