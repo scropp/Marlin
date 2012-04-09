@@ -106,6 +106,13 @@ FORCE_INLINE void serialPrintFloat( float f){
   SERIAL_ECHO( abs(mantissa) );
 }
 
+FORCE_INLINE void serialPrintFloatLn( float f){
+  SERIAL_ECHO((int)f);
+  SERIAL_ECHOPGM(".");
+  int mantissa = (f - (int)f) * 1000;
+  SERIAL_ECHOLN( abs(mantissa) );
+}
+
 void get_command();
 void process_commands();
 
