@@ -563,6 +563,9 @@ void process_commands()
 {
   unsigned long codenum; //throw away variable
   char *starpos = NULL;
+  float Z1_in = 0;
+  float Z2_in = 0;
+  float Z4_in = 0;
 
   if(code_seen('G'))
   {
@@ -690,7 +693,10 @@ void process_commands()
         probe_status();
         break;
     case 32:
-    	FPUTransform_determineBedOrientation();
+    	if(code_seen('A')) Z1_in = code_value();
+    	if(code_seen('B')) Z2_in = code_value();
+    	if(code_seen('C')) Z4_in = code_value();
+    	FPUTransform_determineBedOrientation(Z1_in, Z2_in, Z4_in);
     	break;
     case 90: // G90
       relative_mode = false;

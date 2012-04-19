@@ -108,7 +108,7 @@ void FPUDisable()
 	FPUEnabled = false;
 }
 
-void FPUTransform_determineBedOrientation()
+void FPUTransform_determineBedOrientation(float Z1_in, float Z2_in, float Z4_in)
 {
 int X1 = 15;
 int Y1 = 15;
@@ -121,10 +121,10 @@ float Z3;
 float Z4;
 
 //get Z for X15 Y15, X15 Y(Y_MAX_LENGTH - 15) and X(X_MAX_LENGTH - 15) Y15
-Z1 = Probe_Bed(X1,Y1,PROBE_N);
-Z2 = Probe_Bed(X1,Y2,PROBE_N);
+Z1 = Z1_in ? Z1_in : Probe_Bed(X1,Y1,PROBE_N);
+Z2 = Z2_in ? Z2_in : Probe_Bed(X1,Y2,PROBE_N);
 Z3 = (Z1 + Z2) / 2; //this cannot be measured with the bed spring probe.
-Z4 = Probe_Bed(X4,Y3,PROBE_N);
+Z4 = Z4_in ? Z4_in : Probe_Bed(X4,Y3,PROBE_N);
 
 float Xdiff = X4 - X1;
 	serialPrintFloat(Xdiff);

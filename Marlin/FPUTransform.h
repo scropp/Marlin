@@ -28,7 +28,7 @@
   void FPUEnable();
   void FPUReset();
   void FPUDisable();
-  void FPUTransform_determineBedOrientation();
+  void FPUTransform_determineBedOrientation(float Z1_in, float Z2_in, float Z4_in);
   void FPUTransform_transformDestination(); 
 
 #else //no UMFPU SUPPORT
