@@ -8,7 +8,7 @@
 //User specified version info of THIS file to display in [Pronterface, etc] terminal window during startup.
 //Implementation of an idea by Prof Braino to inform user that any changes made
 //to THIS file by the user have been successfully uploaded into firmware.
-#define STRING_VERSION_CONFIG_H "2012-04-09-1" //Personal revision number for changes to THIS file.
+#define STRING_VERSION_CONFIG_H "2012-05-09-1" //Personal revision number for changes to THIS file.
 #define STRING_CONFIG_H_AUTHOR "SCropp" //Who made the changes.
 
 // This determines the communication speed of the printer
@@ -54,10 +54,10 @@
 // 100 is 100k GE Sensing AL03006-58.2K-97-G1
 // 101 is 100k 0603 SMD Vishay NTCS0603E3104FXT
 
-#define TEMP_SENSOR_0 8
+#define TEMP_SENSOR_0 112 // 4k7 resistor and RS thermistor 198-961
 #define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
-#define TEMP_SENSOR_BED 9
+#define TEMP_SENSOR_BED 1 // 4K7 resistor and 100k thermistor
 
 // Actual temperature must be close to target for this long before M109 returns success
 #define TEMP_RESIDENCY_TIME 10  // (seconds)
@@ -205,7 +205,7 @@ const bool Z_ENDSTOPS_INVERTING = false; // set to true to invert the logic of t
 
 //LCD and SD support
 //#define ULTRA_LCD  //general lcd support, also 16x2
-//#define SDSUPPORT // Enable SD Card Support in Hardware Console
+#define SDSUPPORT // Enable SD Card Support in Hardware Console
 
 //#define ULTIPANEL
 #ifdef ULTIPANEL
